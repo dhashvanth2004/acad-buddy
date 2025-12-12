@@ -24,7 +24,7 @@ const HeroSection = () => {
             
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-6">
               Connect with Senior
-              <span className="text-gradient block mt-2">Mentors</span>
+              <span className="block mt-2 text-primary">Mentors</span>
               <span className="block text-muted-foreground text-2xl md:text-3xl lg:text-4xl font-medium mt-4">
                 Who Understand Your Journey
               </span>
