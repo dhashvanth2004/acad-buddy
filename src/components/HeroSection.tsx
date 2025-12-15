@@ -73,38 +73,35 @@ const HeroSection = () => {
           </div>
 
           {/* Right Content - Hero Image/Illustration */}
-          <div className="relative hidden lg:block animate-fade-in" style={{ animationDelay: '0.3s' }}>
-            <div className="relative z-10">
-              {/* Main Card */}
-              <div className="bg-card rounded-3xl shadow-card p-8 border border-border">
-                <div className="flex items-start gap-4 mb-6">
-                  <div className="w-16 h-16 rounded-2xl gradient-primary flex items-center justify-center text-2xl">
-                    👩‍🎓
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-lg">Priya Sharma</h3>
-                    <p className="text-muted-foreground text-sm">Senior • CSE • 4th Year</p>
-                    <div className="flex items-center gap-1 mt-1">
-                      {[1,2,3,4,5].map((i) => (
-                        <Star key={i} className="w-4 h-4 text-accent fill-current" />
-                      ))}
-                      <span className="text-sm text-muted-foreground ml-1">(48 reviews)</span>
-                    </div>
+          <div className="hidden lg:flex items-center justify-center animate-fade-in" style={{ animationDelay: '0.3s' }}>
+            {/* Main Card */}
+            <div className="bg-card rounded-3xl shadow-card p-8 border border-border max-w-md w-full">
+              <div className="flex items-start gap-4 mb-6">
+                <div className="w-16 h-16 rounded-2xl gradient-primary flex items-center justify-center text-2xl">
+                  👩‍🎓
+                </div>
+                <div>
+                  <h3 className="font-semibold text-lg">Priya Sharma</h3>
+                  <p className="text-muted-foreground text-sm">Senior • CSE • 4th Year</p>
+                  <div className="flex items-center gap-1 mt-1">
+                    {[1,2,3,4,5].map((i) => (
+                      <Star key={i} className="w-4 h-4 text-accent fill-current" />
+                    ))}
+                    <span className="text-sm text-muted-foreground ml-1">(48 reviews)</span>
                   </div>
                 </div>
-                <div className="flex flex-wrap gap-2 mb-6">
-                  <Badge variant="subject">Data Structures</Badge>
-                  <Badge variant="subject">Algorithms</Badge>
-                  <Badge variant="subject">DBMS</Badge>
-                </div>
-                <p className="text-muted-foreground text-sm mb-6">
-                  "I love helping juniors navigate through tough subjects. Having been through the same curriculum, I understand exactly where students struggle."
-                </p>
-                <Button variant="default" className="w-full">
-                  Request Session
-                </Button>
               </div>
-
+              <div className="flex flex-wrap gap-2 mb-6">
+                <Badge variant="subject">Data Structures</Badge>
+                <Badge variant="subject">Algorithms</Badge>
+                <Badge variant="subject">DBMS</Badge>
+              </div>
+              <p className="text-muted-foreground text-sm mb-6">
+                "I love helping juniors navigate through tough subjects. Having been through the same curriculum, I understand exactly where students struggle."
+              </p>
+              <Button variant="default" className="w-full">
+                Request Session
+              </Button>
             </div>
           </div>
         </div>
