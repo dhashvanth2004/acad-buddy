@@ -105,30 +105,6 @@ const HeroSection = () => {
                 </Button>
               </div>
 
-              {/* Floating Elements */}
-              <div className="absolute -top-6 -right-6 bg-card rounded-2xl shadow-lg p-4 border border-border animate-float">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-success/10 flex items-center justify-center">
-                    ✅
-                  </div>
-                  <div>
-                    <p className="font-medium text-sm">Session Completed</p>
-                    <p className="text-xs text-muted-foreground">Data Structures</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="absolute -bottom-4 -left-6 bg-card rounded-2xl shadow-lg p-4 border border-border animate-float" style={{ animationDelay: '1s' }}>
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center">
-                    🎯
-                  </div>
-                  <div>
-                    <p className="font-medium text-sm">2,500+ Sessions</p>
-                    <p className="text-xs text-muted-foreground">Completed this month</p>
-                  </div>
-                </div>
-              </div>
             </div>
           </div>
         </div>
