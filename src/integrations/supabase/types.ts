@@ -21,8 +21,10 @@ export type Database = {
           created_at: string
           department: string | null
           full_name: string | null
+          hourly_rate: number | null
           id: string
           role: Database["public"]["Enums"]["user_role"]
+          subjects: string[] | null
           updated_at: string
           user_id: string
           year: string | null
@@ -33,8 +35,10 @@ export type Database = {
           created_at?: string
           department?: string | null
           full_name?: string | null
+          hourly_rate?: number | null
           id?: string
           role?: Database["public"]["Enums"]["user_role"]
+          subjects?: string[] | null
           updated_at?: string
           user_id: string
           year?: string | null
@@ -45,8 +49,10 @@ export type Database = {
           created_at?: string
           department?: string | null
           full_name?: string | null
+          hourly_rate?: number | null
           id?: string
           role?: Database["public"]["Enums"]["user_role"]
+          subjects?: string[] | null
           updated_at?: string
           user_id?: string
           year?: string | null
