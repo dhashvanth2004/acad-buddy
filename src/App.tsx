@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import Index from "./pages/Index";
 import Mentors from "./pages/Mentors";
+import MentorProfile from "./pages/MentorProfile";
 import Auth from "./pages/Auth";
 import BecomeMentor from "./pages/BecomeMentor";
 import NotFound from "./pages/NotFound";
@@ -22,6 +23,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/mentors" element={<Mentors />} />
+            <Route path="/mentor/:id" element={<MentorProfile />} />
             <Route path="/login" element={<Auth mode="login" />} />
             <Route path="/signup" element={<Auth mode="signup" />} />
             <Route path="/become-mentor" element={<BecomeMentor />} />
