@@ -166,6 +166,8 @@ const BecomeMentor = () => {
           department,
           year,
           bio,
+          subjects,
+          hourly_rate: hourlyRate,
         })
         .eq("user_id", user.id);
 
