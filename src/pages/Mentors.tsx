@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -13,115 +13,22 @@ import { Slider } from "@/components/ui/slider";
 import MentorCard from "@/components/MentorCard";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { Search, SlidersHorizontal, X } from "lucide-react";
+import { Search, SlidersHorizontal, X, Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
-// Mock data for mentors
-const mockMentors = [
-  {
-    id: "1",
-    name: "Priya Sharma",
-    avatar: "👩‍💻",
-    department: "Computer Science",
-    year: "4th Year",
-    subjects: ["Data Structures", "Algorithms", "Python", "Machine Learning"],
-    rating: 4.9,
-    reviewCount: 47,
-    hourlyRate: 200,
-    availability: "Evenings & Weekends",
-    bio: "Passionate about teaching programming concepts. I've helped 50+ students ace their coding interviews and improve their grades.",
-  },
-  {
-    id: "2",
-    name: "Rahul Verma",
-    avatar: "👨‍🔬",
-    department: "Physics",
-    year: "3rd Year",
-    subjects: ["Mechanics", "Electromagnetism", "Quantum Physics"],
-    rating: 4.7,
-    reviewCount: 32,
-    hourlyRate: 150,
-    availability: "Weekdays",
-    bio: "Physics enthusiast with a knack for simplifying complex theories. Let's make physics fun together!",
-  },
-  {
-    id: "3",
-    name: "Ananya Patel",
-    avatar: "👩‍🎓",
-    department: "Mathematics",
-    year: "4th Year",
-    subjects: ["Calculus", "Linear Algebra", "Statistics", "Probability"],
-    rating: 5.0,
-    reviewCount: 63,
-    hourlyRate: 250,
-    availability: "Flexible",
-    bio: "Mathematics gold medalist. I believe every student can excel in math with the right guidance and practice.",
-  },
-  {
-    id: "4",
-    name: "Arjun Reddy",
-    avatar: "👨‍💻",
-    department: "Computer Science",
-    year: "3rd Year",
-    subjects: ["Web Development", "React", "Node.js", "JavaScript"],
-    rating: 4.8,
-    reviewCount: 28,
-    hourlyRate: 0,
-    availability: "Weekends",
-    bio: "Full-stack developer and open source contributor. Happy to help fellow students for free!",
-  },
-  {
-    id: "5",
-    name: "Sneha Gupta",
-    avatar: "👩‍⚕️",
-    department: "Chemistry",
-    year: "4th Year",
-    subjects: ["Organic Chemistry", "Inorganic Chemistry", "Physical Chemistry"],
-    rating: 4.6,
-    reviewCount: 41,
-    hourlyRate: 180,
-    availability: "Mornings",
-    bio: "Chemistry can be magical when you understand the concepts. Let me help you discover the beauty of molecules!",
-  },
-  {
-    id: "6",
-    name: "Vikram Singh",
-    avatar: "👨‍🏫",
-    department: "Economics",
-    year: "3rd Year",
-    subjects: ["Microeconomics", "Macroeconomics", "Econometrics"],
-    rating: 4.5,
-    reviewCount: 19,
-    hourlyRate: 120,
-    availability: "Evenings",
-    bio: "Economics student with internship experience at top consulting firms. Real-world insights included!",
-  },
-  {
-    id: "7",
-    name: "Kavya Nair",
-    avatar: "👩‍🔬",
-    department: "Biology",
-    year: "4th Year",
-    subjects: ["Molecular Biology", "Genetics", "Biochemistry"],
-    rating: 4.9,
-    reviewCount: 55,
-    hourlyRate: 200,
-    availability: "Flexible",
-    bio: "Research assistant with published papers. I can help you understand complex biological concepts with visual aids.",
-  },
-  {
-    id: "8",
-    name: "Rohan Mehta",
-    avatar: "👨‍💼",
-    department: "Business",
-    year: "3rd Year",
-    subjects: ["Accounting", "Finance", "Marketing"],
-    rating: 4.4,
-    reviewCount: 22,
-    hourlyRate: 100,
-    availability: "Weekdays",
-    bio: "Business student with case competition wins. Let's tackle those case studies together!",
-  },
-];
+interface Mentor {
+  id: string;
+  name: string;
+  avatar: string;
+  department: string;
+  year: string;
+  subjects: string[];
+  rating: number;
+  reviewCount: number;
+  hourlyRate: number;
+  availability: string;
+  bio: string;
+}
 
 const departments = [
   "All Departments",
@@ -132,6 +39,10 @@ const departments = [
   "Biology",
   "Economics",
   "Business",
+  "Engineering",
+  "Medicine",
+  "Law",
+  "Arts",
 ];
 
 const subjects = [
@@ -152,15 +63,70 @@ const subjects = [
 ];
 
 const Mentors = () => {
+  const [mentors, setMentors] = useState<Mentor[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedDepartment, setSelectedDepartment] = useState("All Departments");
   const [selectedSubjects, setSelectedSubjects] = useState<string[]>([]);
-  const [priceRange, setPriceRange] = useState([0, 300]);
+  const [priceRange, setPriceRange] = useState([0, 500]);
   const [sortBy, setSortBy] = useState("rating");
   const [showFilters, setShowFilters] = useState(false);
 
+  useEffect(() => {
+    const fetchMentors = async () => {
+      setLoading(true);
+      
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("role", "mentor");
+
+      if (error) {
+        console.error("Error fetching mentors:", error);
+        setLoading(false);
+        return;
+      }
+
+      const formattedMentors: Mentor[] = (data || []).map((profile) => ({
+        id: profile.id,
+        name: profile.full_name || "Anonymous Mentor",
+        avatar: profile.avatar_url || getDefaultAvatar(profile.department),
+        department: profile.department || "General",
+        year: profile.year || "Student",
+        subjects: profile.subjects || [],
+        rating: 4.5 + Math.random() * 0.5, // Placeholder until reviews are implemented
+        reviewCount: Math.floor(Math.random() * 50), // Placeholder
+        hourlyRate: profile.hourly_rate || 0,
+        availability: "Flexible", // Placeholder until availability is added
+        bio: profile.bio || "Experienced mentor ready to help you succeed.",
+      }));
+
+      setMentors(formattedMentors);
+      setLoading(false);
+    };
+
+    fetchMentors();
+  }, []);
+
+  const getDefaultAvatar = (department: string | null): string => {
+    const avatars: Record<string, string> = {
+      "Computer Science": "👩‍💻",
+      "Physics": "👨‍🔬",
+      "Mathematics": "👩‍🎓",
+      "Chemistry": "🧪",
+      "Biology": "🧬",
+      "Economics": "📊",
+      "Business": "💼",
+      "Engineering": "⚙️",
+      "Medicine": "👨‍⚕️",
+      "Law": "⚖️",
+      "Arts": "🎨",
+    };
+    return avatars[department || ""] || "👨‍🏫";
+  };
+
   const filteredMentors = useMemo(() => {
-    let result = [...mockMentors];
+    let result = [...mentors];
 
     // Search filter
     if (searchQuery) {
@@ -209,7 +175,7 @@ const Mentors = () => {
     }
 
     return result;
-  }, [searchQuery, selectedDepartment, selectedSubjects, priceRange, sortBy]);
+  }, [mentors, searchQuery, selectedDepartment, selectedSubjects, priceRange, sortBy]);
 
   const toggleSubject = (subject: string) => {
     setSelectedSubjects((prev) =>
@@ -221,7 +187,7 @@ const Mentors = () => {
     setSearchQuery("");
     setSelectedDepartment("All Departments");
     setSelectedSubjects([]);
-    setPriceRange([0, 300]);
+    setPriceRange([0, 500]);
     setSortBy("rating");
   };
 
@@ -230,7 +196,7 @@ const Mentors = () => {
     selectedDepartment !== "All Departments" ||
     selectedSubjects.length > 0 ||
     priceRange[0] > 0 ||
-    priceRange[1] < 300;
+    priceRange[1] < 500;
 
   return (
     <div className="min-h-screen bg-background">
@@ -332,7 +298,7 @@ const Mentors = () => {
                   <Slider
                     value={priceRange}
                     onValueChange={setPriceRange}
-                    max={300}
+                    max={500}
                     step={10}
                     className="mt-4"
                   />
@@ -363,36 +329,52 @@ const Mentors = () => {
       {/* Results */}
       <section className="py-12">
         <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between mb-8">
-            <p className="text-muted-foreground">
-              Showing <span className="font-semibold text-foreground">{filteredMentors.length}</span>{" "}
-              mentors
-            </p>
-          </div>
-
-          {filteredMentors.length > 0 ? (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {filteredMentors.map((mentor, index) => (
-                <div
-                  key={mentor.id}
-                  className="animate-fade-in"
-                  style={{ animationDelay: `${index * 0.05}s` }}
-                >
-                  <MentorCard {...mentor} />
-                </div>
-              ))}
+          {loading ? (
+            <div className="flex items-center justify-center py-16">
+              <Loader2 className="w-8 h-8 animate-spin text-primary" />
             </div>
           ) : (
-            <div className="text-center py-16">
-              <div className="text-6xl mb-4">🔍</div>
-              <h3 className="text-xl font-semibold mb-2">No mentors found</h3>
-              <p className="text-muted-foreground mb-4">
-                Try adjusting your filters or search query
-              </p>
-              <Button variant="outline" onClick={clearFilters}>
-                Clear Filters
-              </Button>
-            </div>
+            <>
+              <div className="flex items-center justify-between mb-8">
+                <p className="text-muted-foreground">
+                  Showing <span className="font-semibold text-foreground">{filteredMentors.length}</span>{" "}
+                  {filteredMentors.length === 1 ? "mentor" : "mentors"}
+                </p>
+              </div>
+
+              {filteredMentors.length > 0 ? (
+                <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  {filteredMentors.map((mentor, index) => (
+                    <div
+                      key={mentor.id}
+                      className="animate-fade-in"
+                      style={{ animationDelay: `${index * 0.05}s` }}
+                    >
+                      <MentorCard {...mentor} />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-16">
+                  <div className="text-6xl mb-4">🔍</div>
+                  <h3 className="text-xl font-semibold mb-2">No mentors found</h3>
+                  <p className="text-muted-foreground mb-4">
+                    {mentors.length === 0
+                      ? "Be the first to become a mentor!"
+                      : "Try adjusting your filters or search query"}
+                  </p>
+                  {mentors.length === 0 ? (
+                    <Button asChild>
+                      <a href="/become-mentor">Become a Mentor</a>
+                    </Button>
+                  ) : (
+                    <Button variant="outline" onClick={clearFilters}>
+                      Clear Filters
+                    </Button>
+                  )}
+                </div>
+              )}
+            </>
           )}
         </div>
       </section>
