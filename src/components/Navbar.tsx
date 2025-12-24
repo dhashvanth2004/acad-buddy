@@ -1,6 +1,6 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { GraduationCap, Menu, X, LogOut, User } from "lucide-react";
+import { GraduationCap, Menu, X, LogOut, User, LayoutDashboard } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import {
@@ -79,6 +79,10 @@ const Navbar = () => {
                     {user.email}
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => navigate("/dashboard")} className="gap-2">
+                    <LayoutDashboard className="w-4 h-4" />
+                    Dashboard
+                  </DropdownMenuItem>
                   <DropdownMenuItem onClick={handleSignOut} className="gap-2 text-destructive">
                     <LogOut className="w-4 h-4" />
                     Sign Out
@@ -121,20 +125,34 @@ const Navbar = () => {
                   {link.name}
                 </Link>
               ))}
-              <div className="flex gap-3 pt-4 border-t border-border">
+              <div className="flex flex-col gap-3 pt-4 border-t border-border">
                 {user ? (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="flex-1 gap-2"
-                    onClick={() => {
-                      handleSignOut();
-                      setIsOpen(false);
-                    }}
-                  >
-                    <LogOut className="w-4 h-4" />
-                    Sign Out
-                  </Button>
+                  <>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="gap-2"
+                      onClick={() => {
+                        navigate("/dashboard");
+                        setIsOpen(false);
+                      }}
+                    >
+                      <LayoutDashboard className="w-4 h-4" />
+                      Dashboard
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="gap-2 text-destructive"
+                      onClick={() => {
+                        handleSignOut();
+                        setIsOpen(false);
+                      }}
+                    >
+                      <LogOut className="w-4 h-4" />
+                      Sign Out
+                    </Button>
+                  </>
                 ) : (
                   <>
                     <Button variant="ghost" size="sm" className="flex-1" asChild>

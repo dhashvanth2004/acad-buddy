@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      mentor_contacts: {
+        Row: {
+          created_at: string
+          id: string
+          mentor_id: string
+          message: string | null
+          student_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          mentor_id: string
+          message?: string | null
+          student_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          mentor_id?: string
+          message?: string | null
+          student_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -56,6 +80,42 @@ export type Database = {
           updated_at?: string
           user_id?: string
           year?: string | null
+        }
+        Relationships: []
+      }
+      sessions: {
+        Row: {
+          created_at: string
+          duration_minutes: number
+          id: string
+          mentor_id: string
+          notes: string | null
+          scheduled_at: string
+          status: string
+          student_id: string
+          subject: string | null
+        }
+        Insert: {
+          created_at?: string
+          duration_minutes?: number
+          id?: string
+          mentor_id: string
+          notes?: string | null
+          scheduled_at: string
+          status?: string
+          student_id: string
+          subject?: string | null
+        }
+        Update: {
+          created_at?: string
+          duration_minutes?: number
+          id?: string
+          mentor_id?: string
+          notes?: string | null
+          scheduled_at?: string
+          status?: string
+          student_id?: string
+          subject?: string | null
         }
         Relationships: []
       }
