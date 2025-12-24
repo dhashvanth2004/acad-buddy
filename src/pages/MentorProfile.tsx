@@ -7,7 +7,30 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Star,
   Clock,
@@ -19,11 +42,14 @@ import {
   IndianRupee,
   Loader2,
   Send,
-  Calendar,
+  Calendar as CalendarIcon,
   User,
+  CalendarPlus,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 
 interface MentorData {
   id: string;
@@ -163,6 +189,15 @@ const MentorProfile = () => {
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
   const [sendingMessage, setSendingMessage] = useState(false);
+  
+  // Booking state
+  const [bookingOpen, setBookingOpen] = useState(false);
+  const [bookingDate, setBookingDate] = useState<Date | undefined>(undefined);
+  const [bookingTime, setBookingTime] = useState("");
+  const [bookingDuration, setBookingDuration] = useState("60");
+  const [bookingSubject, setBookingSubject] = useState("");
+  const [bookingNotes, setBookingNotes] = useState("");
+  const [bookingLoading, setBookingLoading] = useState(false);
 
   useEffect(() => {
     const fetchMentor = async () => {
@@ -229,6 +264,74 @@ const MentorProfile = () => {
     setMessage("");
     setSendingMessage(false);
   };
+
+  const handleBookSession = async () => {
+    if (!user) {
+      toast({
+        title: "Login required",
+        description: "Please log in to book a session.",
+      });
+      navigate("/login");
+      return;
+    }
+
+    if (!bookingDate || !bookingTime) {
+      toast({
+        variant: "destructive",
+        title: "Missing information",
+        description: "Please select a date and time for your session.",
+      });
+      return;
+    }
+
+    setBookingLoading(true);
+
+    try {
+      // Combine date and time
+      const [hours, minutes] = bookingTime.split(":").map(Number);
+      const scheduledAt = new Date(bookingDate);
+      scheduledAt.setHours(hours, minutes, 0, 0);
+
+      const { error } = await supabase.from("sessions").insert({
+        student_id: user.id,
+        mentor_id: mentor?.user_id,
+        scheduled_at: scheduledAt.toISOString(),
+        duration_minutes: parseInt(bookingDuration),
+        subject: bookingSubject || null,
+        notes: bookingNotes || null,
+        status: "upcoming",
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Session booked!",
+        description: `Your session with ${mentor?.full_name} has been scheduled for ${format(scheduledAt, "MMMM d, yyyy 'at' h:mm a")}.`,
+      });
+
+      // Reset form
+      setBookingOpen(false);
+      setBookingDate(undefined);
+      setBookingTime("");
+      setBookingDuration("60");
+      setBookingSubject("");
+      setBookingNotes("");
+    } catch (error) {
+      console.error("Error booking session:", error);
+      toast({
+        variant: "destructive",
+        title: "Booking failed",
+        description: "There was an error booking your session. Please try again.",
+      });
+    } finally {
+      setBookingLoading(false);
+    }
+  };
+
+  const timeSlots = [
+    "09:00", "10:00", "11:00", "12:00", "13:00", "14:00",
+    "15:00", "16:00", "17:00", "18:00", "19:00", "20:00"
+  ];
 
   const getInitials = (name: string | null) => {
     if (!name) return "M";
@@ -307,7 +410,7 @@ const MentorProfile = () => {
                     </span>
                     <span>•</span>
                     <span className="flex items-center gap-1">
-                      <Calendar className="w-4 h-4" />
+                      <CalendarIcon className="w-4 h-4" />
                       {mentor.year}
                     </span>
                   </div>
@@ -453,6 +556,163 @@ const MentorProfile = () => {
                       </>
                     )}
                   </Button>
+
+                  <div className="relative">
+                    <div className="absolute inset-0 flex items-center">
+                      <span className="w-full border-t border-border" />
+                    </div>
+                    <div className="relative flex justify-center text-xs uppercase">
+                      <span className="bg-card px-2 text-muted-foreground">or</span>
+                    </div>
+                  </div>
+
+                  {/* Book Session Button */}
+                  <Dialog open={bookingOpen} onOpenChange={setBookingOpen}>
+                    <DialogTrigger asChild>
+                      <Button variant="outline" className="w-full gap-2">
+                        <CalendarPlus className="w-4 h-4" />
+                        Book a Session
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-[425px]">
+                      <DialogHeader>
+                        <DialogTitle>Book a Session with {mentor.full_name?.split(" ")[0]}</DialogTitle>
+                        <DialogDescription>
+                          Schedule a mentoring session. Choose your preferred date and time.
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="space-y-4 py-4">
+                        {/* Date Picker */}
+                        <div className="space-y-2">
+                          <Label>Select Date</Label>
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <Button
+                                variant="outline"
+                                className={cn(
+                                  "w-full justify-start text-left font-normal",
+                                  !bookingDate && "text-muted-foreground"
+                                )}
+                              >
+                                <CalendarIcon className="mr-2 h-4 w-4" />
+                                {bookingDate ? format(bookingDate, "PPP") : "Pick a date"}
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0" align="start">
+                              <Calendar
+                                mode="single"
+                                selected={bookingDate}
+                                onSelect={setBookingDate}
+                                disabled={(date) => date < new Date()}
+                                initialFocus
+                                className={cn("p-3 pointer-events-auto")}
+                              />
+                            </PopoverContent>
+                          </Popover>
+                        </div>
+
+                        {/* Time Picker */}
+                        <div className="space-y-2">
+                          <Label>Select Time</Label>
+                          <Select value={bookingTime} onValueChange={setBookingTime}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Choose a time slot" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {timeSlots.map((time) => (
+                                <SelectItem key={time} value={time}>
+                                  {format(new Date(`2000-01-01T${time}:00`), "h:mm a")}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        {/* Duration */}
+                        <div className="space-y-2">
+                          <Label>Session Duration</Label>
+                          <Select value={bookingDuration} onValueChange={setBookingDuration}>
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="30">30 minutes</SelectItem>
+                              <SelectItem value="60">1 hour</SelectItem>
+                              <SelectItem value="90">1.5 hours</SelectItem>
+                              <SelectItem value="120">2 hours</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        {/* Subject */}
+                        <div className="space-y-2">
+                          <Label>Subject (Optional)</Label>
+                          {mentor.subjects && mentor.subjects.length > 0 ? (
+                            <Select value={bookingSubject} onValueChange={setBookingSubject}>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select a subject" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {mentor.subjects.map((subject) => (
+                                  <SelectItem key={subject} value={subject}>
+                                    {subject}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          ) : (
+                            <Input
+                              placeholder="e.g., Data Structures"
+                              value={bookingSubject}
+                              onChange={(e) => setBookingSubject(e.target.value)}
+                            />
+                          )}
+                        </div>
+
+                        {/* Notes */}
+                        <div className="space-y-2">
+                          <Label>Notes (Optional)</Label>
+                          <Textarea
+                            placeholder="Any specific topics you'd like to cover..."
+                            value={bookingNotes}
+                            onChange={(e) => setBookingNotes(e.target.value)}
+                            rows={3}
+                            className="resize-none"
+                          />
+                        </div>
+
+                        {/* Price estimate */}
+                        {mentor.hourly_rate !== null && mentor.hourly_rate > 0 && (
+                          <div className="p-3 bg-muted rounded-lg">
+                            <div className="flex items-center justify-between text-sm">
+                              <span className="text-muted-foreground">Estimated Cost</span>
+                              <span className="font-semibold text-primary">
+                                ₹{Math.round((mentor.hourly_rate / 60) * parseInt(bookingDuration))}
+                              </span>
+                            </div>
+                          </div>
+                        )}
+
+                        <Button
+                          className="w-full gap-2"
+                          onClick={handleBookSession}
+                          disabled={bookingLoading}
+                        >
+                          {bookingLoading ? (
+                            <>
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                              Booking...
+                            </>
+                          ) : (
+                            <>
+                              <CalendarPlus className="w-4 h-4" />
+                              Confirm Booking
+                            </>
+                          )}
+                        </Button>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
 
                   <div className="pt-4 border-t border-border">
                     <div className="flex items-center justify-between text-sm">
