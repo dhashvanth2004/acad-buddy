@@ -251,18 +251,44 @@ const MentorProfile = () => {
       return;
     }
 
+    if (!mentor?.user_id) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Could not find mentor information.",
+      });
+      return;
+    }
+
     setSendingMessage(true);
     
-    // Simulate sending message (in a real app, this would save to database)
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    
-    toast({
-      title: "Message sent!",
-      description: `Your message has been sent to ${mentor?.full_name}. They'll get back to you soon!`,
-    });
-    
-    setMessage("");
-    setSendingMessage(false);
+    try {
+      const { error } = await supabase
+        .from('mentor_contacts')
+        .insert({
+          student_id: user.id,
+          mentor_id: mentor.user_id,
+          message: message.trim()
+        });
+
+      if (error) throw error;
+      
+      toast({
+        title: "Message sent!",
+        description: `Your message has been sent to ${mentor?.full_name}. They'll get back to you soon!`,
+      });
+      
+      setMessage("");
+    } catch (error) {
+      console.error("Error sending message:", error);
+      toast({
+        variant: "destructive",
+        title: "Failed to send message",
+        description: "There was an error sending your message. Please try again.",
+      });
+    } finally {
+      setSendingMessage(false);
+    }
   };
 
   const handleBookSession = async () => {
