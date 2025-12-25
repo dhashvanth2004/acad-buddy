@@ -1,6 +1,6 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { GraduationCap, Menu, X, LogOut, User, LayoutDashboard } from "lucide-react";
+import { GraduationCap, Menu, X, LogOut, User, LayoutDashboard, Bot } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import {
@@ -22,8 +22,8 @@ const Navbar = () => {
   const navLinks = [
     { name: "Home", href: "/" },
     { name: "Find Mentors", href: "/mentors" },
+    { name: "Study Assistant", href: "/study-assistant" },
     { name: "How It Works", href: "/#how-it-works" },
-    { name: "About", href: "/about" },
   ];
 
   const handleSignOut = async () => {

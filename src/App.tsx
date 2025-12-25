@@ -10,6 +10,7 @@ import MentorProfile from "./pages/MentorProfile";
 import Auth from "./pages/Auth";
 import BecomeMentor from "./pages/BecomeMentor";
 import StudentDashboard from "./pages/StudentDashboard";
+import StudyAssistant from "./pages/StudyAssistant";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -29,6 +30,7 @@ const App = () => (
             <Route path="/signup" element={<Auth mode="signup" />} />
             <Route path="/become-mentor" element={<BecomeMentor />} />
             <Route path="/dashboard" element={<StudentDashboard />} />
+            <Route path="/study-assistant" element={<StudyAssistant />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
