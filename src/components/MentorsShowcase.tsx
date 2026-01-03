@@ -65,7 +65,7 @@ const MentorsShowcase = () => {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-12">
           <div className="animate-slide-up">
             <h2 className="text-3xl md:text-4xl font-bold mb-2">
-              Meet Our Top <span className="text-gradient">Mentors</span>
+              Meet Our Top <span className="text-primary font-extrabold">Mentors</span>
             </h2>
             <p className="text-muted-foreground text-lg">
               Experienced seniors ready to guide you through your academic journey
