@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 // Allowed origins for CORS - restrict to known domains
 const ALLOWED_ORIGINS = [
@@ -7,6 +8,12 @@ const ALLOWED_ORIGINS = [
   'https://ylhdobpnmhazvanvgjxl.lovable.app',
   'https://lovable.dev',
 ];
+
+// Simple in-memory rate limiting (resets when function cold starts)
+// For production, consider using Supabase DB or Redis for persistent rate limiting
+const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
+const RATE_LIMIT_WINDOW_MS = 60000; // 1 minute
+const MAX_REQUESTS_PER_WINDOW = 20; // 20 requests per minute per user
 
 const getCorsHeaders = (origin: string | null) => {
   // Check if origin is allowed, otherwise use first allowed origin
@@ -20,6 +27,36 @@ const getCorsHeaders = (origin: string | null) => {
   };
 };
 
+// Check rate limit for a user
+const checkRateLimit = (userId: string): { allowed: boolean; remaining: number; resetIn: number } => {
+  const now = Date.now();
+  const userLimit = rateLimitMap.get(userId);
+  
+  // Clean up expired entries periodically
+  if (rateLimitMap.size > 1000) {
+    for (const [key, value] of rateLimitMap.entries()) {
+      if (now > value.resetTime) {
+        rateLimitMap.delete(key);
+      }
+    }
+  }
+  
+  if (!userLimit || now > userLimit.resetTime) {
+    // First request or window expired - start new window
+    rateLimitMap.set(userId, { count: 1, resetTime: now + RATE_LIMIT_WINDOW_MS });
+    return { allowed: true, remaining: MAX_REQUESTS_PER_WINDOW - 1, resetIn: RATE_LIMIT_WINDOW_MS };
+  }
+  
+  if (userLimit.count >= MAX_REQUESTS_PER_WINDOW) {
+    // Rate limit exceeded
+    return { allowed: false, remaining: 0, resetIn: userLimit.resetTime - now };
+  }
+  
+  // Increment count
+  userLimit.count++;
+  return { allowed: true, remaining: MAX_REQUESTS_PER_WINDOW - userLimit.count, resetIn: userLimit.resetTime - now };
+};
+
 serve(async (req) => {
   const origin = req.headers.get('origin');
   const corsHeaders = getCorsHeaders(origin);
@@ -27,6 +64,56 @@ serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
+
+  // Verify JWT authentication
+  const authHeader = req.headers.get('Authorization');
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    console.warn("Request rejected: missing or invalid Authorization header");
+    return new Response(
+      JSON.stringify({ error: "Unauthorized: Missing authentication token" }),
+      { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  }
+
+  // Create Supabase client with the user's auth token
+  const supabaseClient = createClient(
+    Deno.env.get('SUPABASE_URL') ?? '',
+    Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+    { global: { headers: { Authorization: authHeader } } }
+  );
+
+  // Verify the user's token
+  const { data: { user }, error: authError } = await supabaseClient.auth.getUser();
+  
+  if (authError || !user) {
+    console.warn("Request rejected: invalid or expired token", authError?.message);
+    return new Response(
+      JSON.stringify({ error: "Unauthorized: Invalid or expired token" }),
+      { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  }
+
+  // Check per-user rate limit
+  const rateCheck = checkRateLimit(user.id);
+  if (!rateCheck.allowed) {
+    console.warn("Rate limit exceeded for user:", user.id);
+    return new Response(
+      JSON.stringify({ 
+        error: "Rate limit exceeded. Please wait before sending more requests.",
+        retryAfter: Math.ceil(rateCheck.resetIn / 1000)
+      }),
+      { 
+        status: 429, 
+        headers: { 
+          ...corsHeaders, 
+          "Content-Type": "application/json",
+          "Retry-After": String(Math.ceil(rateCheck.resetIn / 1000))
+        } 
+      }
+    );
+  }
+
+  console.log("Authenticated request from user:", user.id, "- Remaining requests:", rateCheck.remaining);
 
   try {
     const { messages } = await req.json();
