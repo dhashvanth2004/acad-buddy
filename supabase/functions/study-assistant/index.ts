@@ -30,13 +30,69 @@ serve(async (req) => {
 
   try {
     const { messages } = await req.json();
+    
+    // Input validation
+    if (!Array.isArray(messages) || messages.length === 0) {
+      console.warn("Invalid request: messages is not an array or is empty");
+      return new Response(
+        JSON.stringify({ error: "Invalid messages format. Expected non-empty array." }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Limit conversation history to prevent abuse
+    if (messages.length > 50) {
+      console.warn("Request rejected: too many messages", messages.length);
+      return new Response(
+        JSON.stringify({ error: "Too many messages. Maximum 50 per request." }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Validate each message structure and content
+    for (const msg of messages) {
+      if (!msg || typeof msg !== 'object') {
+        return new Response(
+          JSON.stringify({ error: "Invalid message structure" }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      if (!msg.role || !msg.content) {
+        return new Response(
+          JSON.stringify({ error: "Each message must have 'role' and 'content'" }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      if (!['user', 'assistant'].includes(msg.role)) {
+        return new Response(
+          JSON.stringify({ error: "Invalid message role. Must be 'user' or 'assistant'" }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      if (typeof msg.content !== 'string' || msg.content.length > 10000) {
+        return new Response(
+          JSON.stringify({ error: "Message content must be a string under 10000 characters" }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+    }
+
+    // Sanitize messages
+    const sanitizedMessages = messages.map(msg => ({
+      role: msg.role,
+      content: msg.content.trim().slice(0, 10000)
+    }));
+
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     
     if (!LOVABLE_API_KEY) {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    console.log("Processing study assistant request with", messages.length, "messages");
+    console.log("Processing study assistant request with", sanitizedMessages.length, "validated messages");
 
     const systemPrompt = `You are AcadBuddy's AI Study Assistant - a friendly, knowledgeable tutor designed to help college students learn effectively.
 
@@ -67,7 +123,7 @@ When you sense a student needs more personalized help (complex project work, exa
         model: "google/gemini-2.5-flash",
         messages: [
           { role: "system", content: systemPrompt },
-          ...messages,
+          ...sanitizedMessages,
         ],
         stream: true,
       }),
