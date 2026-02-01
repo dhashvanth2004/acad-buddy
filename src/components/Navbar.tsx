@@ -1,8 +1,9 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { GraduationCap, Menu, X, LogOut, User, LayoutDashboard, Bot } from "lucide-react";
-import { useState } from "react";
+import { GraduationCap, Menu, X, LogOut, User, LayoutDashboard } from "lucide-react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,10 +15,29 @@ import { useToast } from "@/hooks/use-toast";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [userRole, setUserRole] = useState<"student" | "mentor">("student");
   const location = useLocation();
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const { toast } = useToast();
+
+  useEffect(() => {
+    const fetchUserRole = async () => {
+      if (!user) return;
+      
+      const { data } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      
+      if (data?.role) {
+        setUserRole(data.role);
+      }
+    };
+
+    fetchUserRole();
+  }, [user]);
 
   const navLinks = [
     { name: "Home", href: "/" },
@@ -79,9 +99,12 @@ const Navbar = () => {
                     {user.email}
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => navigate("/dashboard")} className="gap-2">
+                  <DropdownMenuItem 
+                    onClick={() => navigate(userRole === "mentor" ? "/mentor-dashboard" : "/dashboard")} 
+                    className="gap-2"
+                  >
                     <LayoutDashboard className="w-4 h-4" />
-                    Dashboard
+                    {userRole === "mentor" ? "Mentor Dashboard" : "Dashboard"}
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={handleSignOut} className="gap-2 text-destructive">
                     <LogOut className="w-4 h-4" />
@@ -133,12 +156,12 @@ const Navbar = () => {
                       size="sm"
                       className="gap-2"
                       onClick={() => {
-                        navigate("/dashboard");
+                        navigate(userRole === "mentor" ? "/mentor-dashboard" : "/dashboard");
                         setIsOpen(false);
                       }}
                     >
                       <LayoutDashboard className="w-4 h-4" />
-                      Dashboard
+                      {userRole === "mentor" ? "Mentor Dashboard" : "Dashboard"}
                     </Button>
                     <Button
                       variant="ghost"
