@@ -12,6 +12,7 @@ import BecomeMentor from "./pages/BecomeMentor";
 import StudentDashboard from "./pages/StudentDashboard";
 import MentorDashboard from "./pages/MentorDashboard";
 import StudyAssistant from "./pages/StudyAssistant";
+import Chat from "./pages/Chat";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -33,6 +34,7 @@ const App = () => (
             <Route path="/dashboard" element={<StudentDashboard />} />
             <Route path="/mentor-dashboard" element={<MentorDashboard />} />
             <Route path="/study-assistant" element={<StudyAssistant />} />
+            <Route path="/chat" element={<Chat />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
