@@ -578,9 +578,28 @@ const MentorProfile = () => {
                     ) : (
                       <>
                         <Send className="w-4 h-4" />
-                        Send Message
+                        Send Inquiry
                       </>
                     )}
+                  </Button>
+
+                  <Button
+                    variant="secondary"
+                    className="w-full gap-2"
+                    onClick={() => {
+                      if (!user) {
+                        toast({
+                          title: "Login required",
+                          description: "Please log in to message mentors.",
+                        });
+                        navigate("/login");
+                        return;
+                      }
+                      navigate(`/chat?with=${mentor?.user_id}`);
+                    }}
+                  >
+                    <MessageCircle className="w-4 h-4" />
+                    Open Chat
                   </Button>
 
                   <div className="relative">

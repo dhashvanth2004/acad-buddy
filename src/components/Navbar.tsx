@@ -1,6 +1,6 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { GraduationCap, Menu, X, LogOut, User, LayoutDashboard } from "lucide-react";
+import { GraduationCap, Menu, X, LogOut, User, LayoutDashboard, MessageSquare } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -106,6 +106,13 @@ const Navbar = () => {
                     <LayoutDashboard className="w-4 h-4" />
                     {userRole === "mentor" ? "Mentor Dashboard" : "Dashboard"}
                   </DropdownMenuItem>
+                  <DropdownMenuItem 
+                    onClick={() => navigate("/chat")} 
+                    className="gap-2"
+                  >
+                    <MessageSquare className="w-4 h-4" />
+                    Messages
+                  </DropdownMenuItem>
                   <DropdownMenuItem onClick={handleSignOut} className="gap-2 text-destructive">
                     <LogOut className="w-4 h-4" />
                     Sign Out
@@ -162,6 +169,18 @@ const Navbar = () => {
                     >
                       <LayoutDashboard className="w-4 h-4" />
                       {userRole === "mentor" ? "Mentor Dashboard" : "Dashboard"}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="gap-2"
+                      onClick={() => {
+                        navigate("/chat");
+                        setIsOpen(false);
+                      }}
+                    >
+                      <MessageSquare className="w-4 h-4" />
+                      Messages
                     </Button>
                     <Button
                       variant="ghost"
