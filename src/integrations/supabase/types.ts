@@ -158,6 +158,44 @@ export type Database = {
         }
         Relationships: []
       }
+      reviews: {
+        Row: {
+          comment: string | null
+          created_at: string
+          id: string
+          mentor_id: string
+          rating: number
+          session_id: string
+          student_id: string
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          mentor_id: string
+          rating: number
+          session_id: string
+          student_id: string
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          mentor_id?: string
+          rating?: number
+          session_id?: string
+          student_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reviews_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: true
+            referencedRelation: "sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sessions: {
         Row: {
           created_at: string

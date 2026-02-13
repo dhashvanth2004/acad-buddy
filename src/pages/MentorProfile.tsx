@@ -50,6 +50,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import MentorReviews from "@/components/MentorReviews";
 
 interface MentorData {
   id: string;
@@ -187,6 +188,7 @@ const MentorProfile = () => {
 
   const [mentor, setMentor] = useState<(MentorData & { rating?: number; reviewCount?: number; availability?: string }) | null>(null);
   const [loading, setLoading] = useState(true);
+  const [reviewStats, setReviewStats] = useState<{ avg: number; count: number }>({ avg: 0, count: 0 });
   const [message, setMessage] = useState("");
   const [sendingMessage, setSendingMessage] = useState(false);
   
@@ -215,10 +217,20 @@ const MentorProfile = () => {
         .maybeSingle();
 
       if (data) {
+        // Fetch real review stats
+        const { data: reviews } = await supabase
+          .from("reviews")
+          .select("rating")
+          .eq("mentor_id", data.user_id);
+
+        const count = reviews?.length || 0;
+        const avg = count > 0 ? reviews!.reduce((s, r) => s + r.rating, 0) / count : 0;
+        setReviewStats({ avg, count });
+
         setMentor({
           ...data,
-          rating: 4.8,
-          reviewCount: 0,
+          rating: avg,
+          reviewCount: count,
           availability: "Flexible",
         });
       } else if (mockMentors[id]) {
@@ -525,22 +537,8 @@ const MentorProfile = () => {
                 </CardContent>
               </Card>
 
-              {/* Reviews Placeholder */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Star className="w-5 h-5" />
-                    Student Reviews
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-center py-8 text-muted-foreground">
-                    <MessageCircle className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                    <p>Reviews coming soon!</p>
-                    <p className="text-sm mt-1">Be the first to review this mentor.</p>
-                  </div>
-                </CardContent>
-              </Card>
+              {/* Reviews */}
+              <MentorReviews mentorUserId={mentor.user_id} />
             </div>
 
             {/* Right Column - Contact Card */}
