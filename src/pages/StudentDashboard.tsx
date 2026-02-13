@@ -8,8 +8,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Calendar, Clock, MessageSquare, User, BookOpen } from "lucide-react";
+import { Calendar, Clock, MessageSquare, User, BookOpen, Star } from "lucide-react";
 import { format } from "date-fns";
+import ReviewForm from "@/components/ReviewForm";
 
 interface ContactedMentor {
   id: string;
@@ -42,6 +43,8 @@ const StudentDashboard = () => {
   const navigate = useNavigate();
   const [contacts, setContacts] = useState<ContactedMentor[]>([]);
   const [sessions, setSessions] = useState<Session[]>([]);
+  const [completedSessions, setCompletedSessions] = useState<Session[]>([]);
+  const [reviewedSessionIds, setReviewedSessionIds] = useState<Set<string>>(new Set());
   const [loadingData, setLoadingData] = useState(true);
 
   useEffect(() => {
@@ -87,7 +90,7 @@ const StudentDashboard = () => {
           .from("sessions")
           .select("id, mentor_id, scheduled_at, duration_minutes, status, subject")
           .eq("student_id", user.id)
-          .gte("scheduled_at", new Date().toISOString())
+          .in("status", ["upcoming", "pending"])
           .order("scheduled_at", { ascending: true });
 
         if (sessionsData && sessionsData.length > 0) {
@@ -106,6 +109,43 @@ const StudentDashboard = () => {
           }));
 
           setSessions(sessionsWithMentors);
+        }
+
+        // Fetch completed sessions for review
+        const { data: completedData } = await supabase
+          .from("sessions")
+          .select("id, mentor_id, scheduled_at, duration_minutes, status, subject")
+          .eq("student_id", user.id)
+          .eq("status", "completed")
+          .order("scheduled_at", { ascending: false })
+          .limit(10);
+
+        if (completedData && completedData.length > 0) {
+          const mentorIds = completedData.map((s) => s.mentor_id);
+          const { data: mentorsData } = await supabase
+            .from("profiles")
+            .select("user_id, full_name, avatar_url")
+            .in("user_id", mentorIds);
+
+          const completedWithMentors = completedData.map((session) => ({
+            ...session,
+            mentor: mentorsData?.find((m) => m.user_id === session.mentor_id) || {
+              full_name: null,
+              avatar_url: null,
+            },
+          }));
+
+          setCompletedSessions(completedWithMentors);
+
+          // Check which sessions already have reviews
+          const { data: existingReviews } = await supabase
+            .from("reviews")
+            .select("session_id")
+            .eq("student_id", user.id);
+
+          if (existingReviews) {
+            setReviewedSessionIds(new Set(existingReviews.map((r) => r.session_id)));
+          }
         }
       } catch (error) {
         console.error("Error fetching dashboard data:", error);
@@ -296,6 +336,56 @@ const StudentDashboard = () => {
             </CardContent>
           </Card>
         </div>
+
+        {/* Completed Sessions - Review */}
+        {completedSessions.length > 0 && (
+          <Card className="mt-8 shadow-card">
+            <CardHeader className="flex flex-row items-center gap-3">
+              <div className="p-2 rounded-lg bg-accent/20">
+                <Star className="h-5 w-5 text-accent-foreground" />
+              </div>
+              <CardTitle className="text-xl">Review Completed Sessions</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-6">
+                {completedSessions.map((session) => (
+                  <div key={session.id} className="p-4 rounded-lg border bg-card">
+                    <div className="flex items-center gap-4 mb-3">
+                      <Avatar className="h-10 w-10">
+                        <AvatarImage src={session.mentor.avatar_url || undefined} />
+                        <AvatarFallback className="bg-primary/10 text-primary">
+                          {getInitials(session.mentor.full_name)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1">
+                        <p className="font-medium">{session.mentor.full_name || "Mentor"}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {format(new Date(session.scheduled_at), "MMM d, yyyy")}
+                          {session.subject && ` · ${session.subject}`}
+                        </p>
+                      </div>
+                      {reviewedSessionIds.has(session.id) && (
+                        <Badge variant="secondary" className="gap-1">
+                          <Star className="w-3 h-3 fill-current" /> Reviewed
+                        </Badge>
+                      )}
+                    </div>
+                    {!reviewedSessionIds.has(session.id) && user && (
+                      <ReviewForm
+                        sessionId={session.id}
+                        mentorId={session.mentor_id}
+                        studentId={user.id}
+                        onReviewSubmitted={() => {
+                          setReviewedSessionIds((prev) => new Set([...prev, session.id]));
+                        }}
+                      />
+                    )}
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Quick Actions */}
         <Card className="mt-8 shadow-card">

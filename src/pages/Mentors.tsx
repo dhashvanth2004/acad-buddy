@@ -87,19 +87,36 @@ const Mentors = () => {
         return;
       }
 
-      const formattedMentors: Mentor[] = (data || []).map((profile) => ({
-        id: profile.id,
-        name: profile.full_name || "Anonymous Mentor",
-        avatar: profile.avatar_url || getDefaultAvatar(profile.department),
-        department: profile.department || "General",
-        year: profile.year || "Student",
-        subjects: profile.subjects || [],
-        rating: 4.5 + Math.random() * 0.5, // Placeholder until reviews are implemented
-        reviewCount: Math.floor(Math.random() * 50), // Placeholder
-        hourlyRate: profile.hourly_rate || 0,
-        availability: "Flexible", // Placeholder until availability is added
-        bio: profile.bio || "Experienced mentor ready to help you succeed.",
-      }));
+      // Fetch review stats for all mentors
+      const mentorUserIds = (data || []).map((p) => p.user_id);
+      const { data: allReviews } = await supabase
+        .from("reviews")
+        .select("mentor_id, rating")
+        .in("mentor_id", mentorUserIds);
+
+      const reviewMap: Record<string, { sum: number; count: number }> = {};
+      (allReviews || []).forEach((r) => {
+        if (!reviewMap[r.mentor_id]) reviewMap[r.mentor_id] = { sum: 0, count: 0 };
+        reviewMap[r.mentor_id].sum += r.rating;
+        reviewMap[r.mentor_id].count += 1;
+      });
+
+      const formattedMentors: Mentor[] = (data || []).map((profile) => {
+        const stats = reviewMap[profile.user_id];
+        return {
+          id: profile.id,
+          name: profile.full_name || "Anonymous Mentor",
+          avatar: profile.avatar_url || getDefaultAvatar(profile.department),
+          department: profile.department || "General",
+          year: profile.year || "Student",
+          subjects: profile.subjects || [],
+          rating: stats ? stats.sum / stats.count : 0,
+          reviewCount: stats?.count || 0,
+          hourlyRate: profile.hourly_rate || 0,
+          availability: "Flexible",
+          bio: profile.bio || "Experienced mentor ready to help you succeed.",
+        };
+      });
 
       setMentors(formattedMentors);
       setLoading(false);
