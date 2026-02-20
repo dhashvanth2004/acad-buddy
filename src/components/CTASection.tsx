@@ -1,7 +1,19 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { ArrowRight, Sparkles } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+
 const CTASection = () => {
+  const { user } = useAuth();
+  const [isMentor, setIsMentor] = useState(false);
+
+  useEffect(() => {
+    if (!user) return;
+    supabase.from("profiles").select("role").eq("user_id", user.id).maybeSingle()
+      .then(({ data }) => { if (data?.role === "mentor") setIsMentor(true); });
+  }, [user]);
   return <section className="py-24 relative overflow-hidden">
       {/* Background */}
       <div className="absolute inset-0 gradient-hero opacity-95" />
@@ -33,9 +45,11 @@ const CTASection = () => {
                 <ArrowRight className="w-5 h-5" />
               </Link>
             </Button>
-            <Button variant="outline" size="xl" className="border-2 border-primary-foreground/30 text-primary-foreground bg-transparent hover:bg-primary-foreground/10" asChild>
-              <Link to="/become-mentor">Become a Mentor</Link>
-            </Button>
+            {!isMentor && (
+              <Button variant="outline" size="xl" className="border-2 border-primary-foreground/30 text-primary-foreground bg-transparent hover:bg-primary-foreground/10" asChild>
+                <Link to="/become-mentor">Become a Mentor</Link>
+              </Button>
+            )}
           </div>
 
           <p className="text-primary-foreground/70 text-sm mt-6 animate-fade-in" style={{
