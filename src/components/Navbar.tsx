@@ -44,7 +44,7 @@ const Navbar = () => {
     { name: "Find Mentors", href: "/mentors" },
     { name: "Study Assistant", href: "/study-assistant" },
     { name: "How It Works", href: "/#how-it-works" },
-  ];
+  ].filter(Boolean);
 
   const handleSignOut = async () => {
     await signOut();

@@ -2,7 +2,19 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
 import { ArrowRight, Sparkles, Users, BookOpen, Star } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+
 const HeroSection = () => {
+  const { user } = useAuth();
+  const [isMentor, setIsMentor] = useState(false);
+
+  useEffect(() => {
+    if (!user) return;
+    supabase.from("profiles").select("role").eq("user_id", user.id).maybeSingle()
+      .then(({ data }) => { if (data?.role === "mentor") setIsMentor(true); });
+  }, [user]);
   return <section className="relative min-h-screen flex items-center justify-center pt-16 overflow-hidden">
       {/* Background Pattern */}
       <div className="absolute inset-0 -z-10">
@@ -39,9 +51,11 @@ const HeroSection = () => {
                 <ArrowRight className="w-5 h-5" />
               </Link>
             </Button>
-            <Button variant="outline" size="xl" asChild>
-              <Link to="/become-mentor">Become a Mentor</Link>
-            </Button>
+            {!isMentor && (
+              <Button variant="outline" size="xl" asChild>
+                <Link to="/become-mentor">Become a Mentor</Link>
+              </Button>
+            )}
           </div>
 
           {/* Stats */}
