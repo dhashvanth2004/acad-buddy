@@ -107,6 +107,13 @@ const Navbar = () => {
                     {userRole === "mentor" ? "Mentor Dashboard" : "Dashboard"}
                   </DropdownMenuItem>
                   <DropdownMenuItem 
+                    onClick={() => navigate("/edit-profile")} 
+                    className="gap-2"
+                  >
+                    <User className="w-4 h-4" />
+                    Edit Profile
+                  </DropdownMenuItem>
+                  <DropdownMenuItem 
                     onClick={() => navigate("/chat")} 
                     className="gap-2"
                   >
