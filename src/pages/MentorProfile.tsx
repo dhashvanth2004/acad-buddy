@@ -276,11 +276,11 @@ const MentorProfile = () => {
     
     try {
       const { error } = await supabase
-        .from('mentor_contacts')
+        .from('messages')
         .insert({
-          student_id: user.id,
-          mentor_id: mentor.user_id,
-          message: message.trim()
+          sender_id: user.id,
+          receiver_id: mentor.user_id,
+          content: message.trim()
         });
 
       if (error) throw error;
@@ -291,6 +291,8 @@ const MentorProfile = () => {
       });
       
       setMessage("");
+      // Navigate to chat with this mentor
+      navigate(`/chat?with=${mentor.user_id}`);
     } catch (error) {
       console.error("Error sending message:", error);
       toast({

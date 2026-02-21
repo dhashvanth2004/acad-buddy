@@ -20,6 +20,7 @@ import {
   XCircle,
   TrendingUp,
   BookOpen,
+  MessageSquare,
 } from "lucide-react";
 import { format } from "date-fns";
 
@@ -466,6 +467,15 @@ const MentorDashboard = () => {
                           <XCircle className="h-4 w-4" />
                           Decline
                         </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="gap-1"
+                          onClick={() => navigate(`/chat?with=${session.student_id}`)}
+                        >
+                          <MessageSquare className="h-4 w-4" />
+                          Chat
+                        </Button>
                       </div>
                     </div>
                   ))}
@@ -524,9 +534,19 @@ const MentorDashboard = () => {
                           </div>
                         )}
                       </div>
-                      <Badge className={getStatusColor(session.status)}>
-                        {session.status}
-                      </Badge>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="gap-1"
+                          onClick={() => navigate(`/chat?with=${session.student_id}`)}
+                        >
+                          <MessageSquare className="h-4 w-4" />
+                        </Button>
+                        <Badge className={getStatusColor(session.status)}>
+                          {session.status}
+                        </Badge>
+                      </div>
                     </div>
                   ))}
                 </div>
