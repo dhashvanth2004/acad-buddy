@@ -35,25 +35,34 @@ const ResetPassword = () => {
   // Validate token from URL on mount
   useEffect(() => {
     const validateToken = async () => {
-      const hash = searchParams.get("hash") || window.location.hash;
+      // Supabase sends recovery tokens in the URL hash fragment
+      const hash = window.location.hash;
       
-      if (!hash) {
+      if (!hash || !hash.includes("access_token")) {
         setIsValidToken(false);
         setValidating(false);
-        toast({
-          variant: "destructive",
-          title: "Invalid Link",
-          description: "The password reset link is invalid or has expired.",
-        });
         return;
       }
 
       try {
-        // The hash is automatically handled by Supabase for recovery flow
-        // We just need to check if the session is valid
+        // Check if we have a valid session from the recovery link
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error || !session) {
+          setIsValidToken(false);
+          setValidating(false);
+          toast({
+            variant: "destructive",
+            title: "Invalid Link",
+            description: "The password reset link is invalid or has expired.",
+          });
+          return;
+        }
+
         setIsValidToken(true);
         setValidating(false);
       } catch (error) {
+        console.error("Token validation error:", error);
         setIsValidToken(false);
         setValidating(false);
         toast({
@@ -65,7 +74,7 @@ const ResetPassword = () => {
     };
 
     validateToken();
-  }, [searchParams, toast]);
+  }, [toast]);
 
   const validateForm = () => {
     const newErrors: { password?: string; confirmPassword?: string } = {};
@@ -110,8 +119,8 @@ const ResetPassword = () => {
           description: "Your password has been reset successfully.",
         });
         setTimeout(() => {
-          navigate("/login");
-        }, 1500);
+          navigate("/password-reset-success");
+        }, 1000);
       }
     } finally {
       setLoading(false);

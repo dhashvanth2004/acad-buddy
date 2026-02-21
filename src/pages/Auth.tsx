@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { GraduationCap, BookOpen, Users, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 // Validation schemas
 const emailSchema = z.string().trim().email({ message: "Please enter a valid email address" });
@@ -34,7 +35,23 @@ const Auth = ({ mode }: AuthProps) => {
   // Redirect if already logged in
   useEffect(() => {
     if (user && !authLoading) {
-      navigate("/");
+      // Fetch user role and redirect to appropriate dashboard
+      const redirectUser = async () => {
+        const { data } = await supabase
+          .from("profiles")
+          .select("role")
+          .eq("user_id", user.id)
+          .maybeSingle();
+        
+        const userRole = data?.role;
+        if (userRole === "mentor") {
+          navigate("/mentor-dashboard");
+        } else {
+          navigate("/dashboard");
+        }
+      };
+      
+      redirectUser();
     }
   }, [user, authLoading, navigate]);
 

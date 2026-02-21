@@ -54,6 +54,10 @@ const ForgotPassword = () => {
           title: "Success!",
           description: "Check your email for password reset instructions.",
         });
+        // Auto-redirect after 1 minute
+        setTimeout(() => {
+          navigate("/");
+        }, 60000);
       }
     } finally {
       setLoading(false);
@@ -131,7 +135,7 @@ const ForgotPassword = () => {
                   If the email address matches an account, you'll receive a password reset link within a few minutes. Make sure to check your spam folder if you don't see it.
                 </p>
                 <Button
-                  onClick={() => navigate("/login")}
+                  onClick={() => navigate("/")}
                   className="w-full"
                   variant="outline"
                 >
@@ -139,16 +143,6 @@ const ForgotPassword = () => {
                 </Button>
               </div>
             )}
-
-            <div className="mt-6 text-center">
-              <Link
-                to="/login"
-                className="text-sm text-muted-foreground hover:text-primary inline-flex items-center gap-1"
-              >
-                <ArrowLeft className="w-4 h-4" />
-                Back to login
-              </Link>
-            </div>
           </CardContent>
         </Card>
       </div>

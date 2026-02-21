@@ -16,6 +16,7 @@ import Chat from "./pages/Chat";
 import EditProfile from "./pages/EditProfile";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
+import PasswordResetSuccess from "./pages/PasswordResetSuccess";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -35,6 +36,7 @@ const App = () => (
             <Route path="/signup" element={<Auth mode="signup" />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/password-reset-success" element={<PasswordResetSuccess />} />
             <Route path="/become-mentor" element={<BecomeMentor />} />
             <Route path="/dashboard" element={<StudentDashboard />} />
             <Route path="/mentor-dashboard" element={<MentorDashboard />} />

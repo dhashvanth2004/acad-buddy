@@ -40,11 +40,26 @@ const Navbar = () => {
   }, [user]);
 
   const navLinks = [
-    { name: "Home", href: "/" },
-    { name: "Find Mentors", href: "/mentors" },
+    { name: "Home", href: "/home" },
+    { name: "Find Mentors", href: "/mentors", scrollToTop: true },
     { name: "Study Assistant", href: "/study-assistant" },
-    { name: "How It Works", href: "/#how-it-works" },
+    { name: "How It Works", href: "/home", hash: "how-it-works" },
   ].filter(Boolean);
+
+  const handleHowItWorksClick = () => {
+    navigate("/home");
+    setTimeout(() => {
+      const element = document.getElementById("how-it-works");
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }, 100);
+  };
+
+  const handleScrollToTop = (href: string) => {
+    navigate(href);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   const handleSignOut = async () => {
     await signOut();
@@ -72,15 +87,34 @@ const Navbar = () => {
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-8">
             {navLinks.map((link) => (
-              <Link
-                key={link.name}
-                to={link.href}
-                className={`text-sm font-medium transition-colors hover:text-primary ${
-                  location.pathname === link.href ? "text-primary" : "text-muted-foreground"
-                }`}
-              >
-                {link.name}
-              </Link>
+              <div key={link.name}>
+                {link.hash ? (
+                  <button
+                    onClick={handleHowItWorksClick}
+                    className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+                  >
+                    {link.name}
+                  </button>
+                ) : link.scrollToTop ? (
+                  <button
+                    onClick={() => handleScrollToTop(link.href)}
+                    className={`text-sm font-medium transition-colors hover:text-primary ${
+                      location.pathname === link.href ? "text-primary" : "text-muted-foreground"
+                    }`}
+                  >
+                    {link.name}
+                  </button>
+                ) : (
+                  <Link
+                    to={link.href}
+                    className={`text-sm font-medium transition-colors hover:text-primary ${
+                      location.pathname === link.href ? "text-primary" : "text-muted-foreground"
+                    }`}
+                  >
+                    {link.name}
+                  </Link>
+                )}
+              </div>
             ))}
           </div>
 
@@ -153,14 +187,37 @@ const Navbar = () => {
           <div className="md:hidden py-4 border-t border-border animate-fade-in">
             <div className="flex flex-col gap-4">
               {navLinks.map((link) => (
-                <Link
-                  key={link.name}
-                  to={link.href}
-                  className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
-                  onClick={() => setIsOpen(false)}
-                >
-                  {link.name}
-                </Link>
+                <div key={link.name}>
+                  {link.hash ? (
+                    <button
+                      onClick={() => {
+                        handleHowItWorksClick();
+                        setIsOpen(false);
+                      }}
+                      className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors w-full text-left"
+                    >
+                      {link.name}
+                    </button>
+                  ) : link.scrollToTop ? (
+                    <button
+                      onClick={() => {
+                        handleScrollToTop(link.href);
+                        setIsOpen(false);
+                      }}
+                      className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors w-full text-left"
+                    >
+                      {link.name}
+                    </button>
+                  ) : (
+                    <Link
+                      to={link.href}
+                      className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+                      onClick={() => setIsOpen(false)}
+                    >
+                      {link.name}
+                    </Link>
+                  )}
+                </div>
               ))}
               <div className="flex flex-col gap-3 pt-4 border-t border-border">
                 {user ? (

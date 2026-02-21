@@ -220,7 +220,7 @@ const Mentors = () => {
       <Navbar />
 
       {/* Header */}
-      <section className="pt-24 pb-8 bg-gradient-to-b from-primary/5 to-background">
+      <section className="scroll-mt-20 pt-24 pb-8 bg-gradient-to-b from-primary/5 to-background">
         <div className="container mx-auto px-4">
           <div className="text-center max-w-2xl mx-auto animate-slide-up">
             <h1 className="text-3xl md:text-4xl font-bold mb-4">Find Your Perfect Mentor</h1>
