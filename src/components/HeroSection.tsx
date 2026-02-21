@@ -9,12 +9,37 @@ import { supabase } from "@/integrations/supabase/client";
 const HeroSection = () => {
   const { user } = useAuth();
   const [isMentor, setIsMentor] = useState(false);
+  const [activeMentorCount, setActiveMentorCount] = useState(0);
 
   useEffect(() => {
     if (!user) return;
     supabase.from("profiles").select("role").eq("user_id", user.id).maybeSingle()
       .then(({ data }) => { if (data?.role === "mentor") setIsMentor(true); });
   }, [user]);
+
+  useEffect(() => {
+    const fetchActiveMentors = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("profiles")
+          .select("id", { count: "exact" })
+          .eq("role", "mentor");
+        
+        if (error) {
+          console.error("Error fetching mentor count:", error);
+          return;
+        }
+        
+        const count = data?.length || 0;
+        console.log("Mentor count fetched:", count);
+        setActiveMentorCount(count);
+      } catch (error) {
+        console.error("Failed to fetch mentors:", error);
+      }
+    };
+
+    fetchActiveMentors();
+  }, []);
   return <section className="relative min-h-screen flex items-center justify-center pt-16 overflow-hidden">
       {/* Background Pattern */}
       <div className="absolute inset-0 -z-10">
@@ -63,7 +88,7 @@ const HeroSection = () => {
             <div className="text-center">
               <div className="flex items-center justify-center gap-1 text-3xl font-bold text-primary">
                 <Users className="w-6 h-6" />
-                500+
+                {activeMentorCount > 0 ? `${activeMentorCount}+` : (activeMentorCount === 0 ? "0" : "500+")}
               </div>
               <p className="text-sm text-muted-foreground">Active Mentors</p>
             </div>

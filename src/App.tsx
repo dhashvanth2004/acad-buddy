@@ -28,10 +28,10 @@ const App = () => (
       <BrowserRouter>
         <AuthProvider>
           <Routes>
-            <Route path="/" element={<Index />} />
+            <Route path="/" element={<Auth mode="login" />} />
+            <Route path="/home" element={<Index />} />
             <Route path="/mentors" element={<Mentors />} />
             <Route path="/mentor/:id" element={<MentorProfile />} />
-            <Route path="/login" element={<Auth mode="login" />} />
             <Route path="/signup" element={<Auth mode="signup" />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
