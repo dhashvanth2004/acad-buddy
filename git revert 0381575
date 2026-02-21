@@ -1,0 +1,63 @@
+[33m4a9d2b0[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m Add delete policies and validate
+[33m69f3e59[m Changes
+[33m8a59616[m Restrict mentor profiles access
+[33m15bb0f7[m Changes
+[33m35fbe3b[m Fix profile access policy
+[33m94a4a8b[m Changes
+[33m0381575[m Apply Deep Blue/Indigo theme
+[33mba2b84b[m Changes
+[33m26982da[m Make AcadBuddy text visible
+[33m9602d90[m Changes
+[33mf09a3f6[m Make mentors text visible
+[33mcbc2de4[m Changes
+[33m4bbeb6e[m Make testimonial text visible
+[33mcd6ac23[m Changes
+[33meafbe9b[m Visual edit in Lovable
+[33m9d5cd52[m Fix study assistant auth test
+[33m9ef0c20[m Changes
+[33m702f1a0[m Add auth to study assistant
+[33m84ea616[m Changes
+[33m5c31ce0[m Restrict profiles access
+[33m479b03e[m Changes
+[33m4054b6a[m Make AcadBuddy text visible
+[33mdf9e595[m Changes
+[33med0593e[m Fix header gradient visibility
+[33m4b36654[m Changes
+[33mb4ad940[m Visual edit in Lovable
+[33mf4f48f5[m Fix warn security issues
+[33m3245d6a[m Changes
+[33mc24d43b[m Add AI study assistant chat
+[33m1598436[m Changes
+[33m2756d62[m Fix security issues load
+[33m004ba74[m Changes
+[33m9ae877a[m Add session booking on mentor profile
+[33m750879f[m Changes
+[33m1b8336b[m Add StudentDashboard page
+[33mff3732a[m Changes
+[33m5d84199[m Fetch real mentors from DB
+[33m125309b[m Changes
+[33m1809810[m Add mentor profile page
+[33m462542e[m Changes
+[33m6138080[m Add mentor fields to profiles
+[33m08e2ddd[m Changes
+[33m2bf2943[m Add Become a Mentor page
+[33mf7d6818[m Changes
+[33m4ceaf03[m Revise auth routing and UI
+[33m097c13b[m Changes
+[33m6e7c8bb[m Lovable update
+[33m162e5ef[m Changes
+[33mefbc8ad[m Create Mentors search page
+[33me283df0[m Changes
+[33m243fd54[m Center hero layout
+[33mc06e54f[m Changes
+[33m73ff66d[m Visual edit in Lovable
+[33m33eec26[m Visual edit in Lovable
+[33m7cc5005[m Realign hero section
+[33m19ce0bb[m Changes
+[33m2bbfc87[m Remove hero floating alerts
+[33me4fa0c6[m Changes
+[33maef74e3[m Update landing page components
+[33md429b8b[m Changes
+[33ma459523[m Build ACADBUDDY UI kit
+[33mc7c0d30[m Changes
+[33m6d4c79f[m template: template_bun_shadcn_react_vite_bun_ts

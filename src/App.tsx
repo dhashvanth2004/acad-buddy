@@ -14,6 +14,8 @@ import MentorDashboard from "./pages/MentorDashboard";
 import StudyAssistant from "./pages/StudyAssistant";
 import Chat from "./pages/Chat";
 import EditProfile from "./pages/EditProfile";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -31,6 +33,8 @@ const App = () => (
             <Route path="/mentor/:id" element={<MentorProfile />} />
             <Route path="/login" element={<Auth mode="login" />} />
             <Route path="/signup" element={<Auth mode="signup" />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/become-mentor" element={<BecomeMentor />} />
             <Route path="/dashboard" element={<StudentDashboard />} />
             <Route path="/mentor-dashboard" element={<MentorDashboard />} />

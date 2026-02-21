@@ -207,6 +207,14 @@ const Auth = ({ mode }: AuthProps) => {
                 {errors.password && (
                   <p className="text-sm text-destructive">{errors.password}</p>
                 )}
+                {mode === "login" && (
+                  <Link
+                    to="/forgot-password"
+                    className="text-sm text-primary hover:underline inline-block mt-1"
+                  >
+                    Forgot password?
+                  </Link>
+                )}
               </div>
 
               {mode === "signup" && (
