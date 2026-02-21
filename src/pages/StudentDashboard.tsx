@@ -254,9 +254,22 @@ const StudentDashboard = () => {
                           </div>
                         )}
                       </div>
-                      <Badge className={getStatusColor(session.status)}>
-                        {session.status}
-                      </Badge>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="gap-1"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(`/chat?with=${session.mentor_id}`);
+                          }}
+                        >
+                          <MessageSquare className="h-4 w-4" />
+                        </Button>
+                        <Badge className={getStatusColor(session.status)}>
+                          {session.status}
+                        </Badge>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -397,6 +410,10 @@ const StudentDashboard = () => {
               <Button onClick={() => navigate("/mentors")} className="gap-2">
                 <User className="h-4 w-4" />
                 Find New Mentors
+              </Button>
+              <Button variant="outline" onClick={() => navigate("/chat")} className="gap-2">
+                <MessageSquare className="h-4 w-4" />
+                My Messages
               </Button>
               <Button variant="outline" onClick={() => navigate("/become-mentor")} className="gap-2">
                 <BookOpen className="h-4 w-4" />
