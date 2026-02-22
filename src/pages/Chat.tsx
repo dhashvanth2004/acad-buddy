@@ -25,7 +25,7 @@ const Chat = () => {
   // Redirect if not logged in
   useEffect(() => {
     if (!authLoading && !user) {
-      navigate("/");
+      navigate("/login");
     }
   }, [user, authLoading, navigate]);
 

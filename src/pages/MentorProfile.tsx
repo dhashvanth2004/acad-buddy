@@ -311,7 +311,7 @@ const MentorProfile = () => {
         title: "Login required",
         description: "Please log in to book a session.",
       });
-      navigate("/");
+      navigate("/login");
       return;
     }
 
@@ -592,7 +592,7 @@ const MentorProfile = () => {
                           title: "Login required",
                           description: "Please log in to message mentors.",
                         });
-                        navigate("/");
+                        navigate("/login");
                         return;
                       }
                       navigate(`/chat?with=${mentor?.user_id}`);

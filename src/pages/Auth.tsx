@@ -22,7 +22,7 @@ interface AuthProps {
 
 const Auth = ({ mode }: AuthProps) => {
   const navigate = useNavigate();
-  const { user, loading: authLoading, signIn, signUp, signOut } = useAuth();
+  const { user, loading: authLoading, signIn, signUp } = useAuth();
   const { toast } = useToast();
 
   const [email, setEmail] = useState("");
@@ -127,15 +127,9 @@ const Auth = ({ mode }: AuthProps) => {
             });
           }
         } else {
-          // Ensure user is logged out after signup and redirect to login page
-          try {
-            await signOut();
-          } catch (e) {
-            // ignore sign out errors
-          }
           toast({
             title: "Account created!",
-            description: "Account created. Please log in to continue.",
+            description: "Welcome to AcadBuddy. Let's get started!",
           });
           navigate("/");
         }
@@ -305,7 +299,7 @@ const Auth = ({ mode }: AuthProps) => {
               ) : (
                 <p className="text-muted-foreground">
                   Already have an account?{" "}
-                  <Link to="/" className="text-primary font-medium hover:underline">
+                  <Link to="/login" className="text-primary font-medium hover:underline">
                     Log in
                   </Link>
                 </p>

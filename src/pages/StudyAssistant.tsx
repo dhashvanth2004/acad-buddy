@@ -48,7 +48,7 @@ const StudyAssistant = () => {
         description: "Please sign in to use the Study Assistant.",
         variant: "destructive",
       });
-      navigate("/");
+      navigate("/login");
     }
   }, [user, authLoading, navigate, toast]);
 
@@ -162,7 +162,7 @@ const StudyAssistant = () => {
     <div className="min-h-screen flex flex-col bg-background">
       <Navbar />
       
-      <main className="flex-1 container mx-auto px-4 py-8 max-w-4xl">
+      <main className="flex-1 container mx-auto px-4 py-8 pt-20 pb-24 max-w-4xl">
         <div className="text-center mb-6">
           <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full mb-4">
             <Sparkles className="h-4 w-4" />
@@ -174,7 +174,7 @@ const StudyAssistant = () => {
           </p>
         </div>
 
-        <Card className="flex flex-col h-[600px]">
+        <Card className="flex flex-col h-[calc(100vh-8rem)] md:h-[calc(100vh-10rem)] lg:h-[calc(100vh-12rem)]">
           <ScrollArea className="flex-1 p-4" ref={scrollAreaRef}>
             {messages.length === 0 ? (
               <div className="h-full flex flex-col items-center justify-center text-center p-8">
@@ -195,7 +195,7 @@ const StudyAssistant = () => {
                       onClick={() => handleSend(question)}
                     >
                       <BookOpen className="h-4 w-4 mr-2 flex-shrink-0" />
-                      <span className="text-sm">{question}</span>
+                      <span className="text-sm text-foreground">{question}</span>
                     </Button>
                   ))}
                 </div>

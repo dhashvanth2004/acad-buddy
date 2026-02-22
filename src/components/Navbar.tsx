@@ -163,7 +163,7 @@ const Navbar = () => {
             ) : (
               <>
                 <Button variant="ghost" size="sm" asChild>
-                  <Link to="/">Log In</Link>
+                  <Link to="/login">Log In</Link>
                 </Button>
                 <Button variant="default" size="sm" asChild>
                   <Link to="/signup">Get Started</Link>
@@ -262,7 +262,7 @@ const Navbar = () => {
                 ) : (
                   <>
                     <Button variant="ghost" size="sm" className="flex-1" asChild>
-                      <Link to="/" onClick={() => setIsOpen(false)}>Log In</Link>
+                      <Link to="/login" onClick={() => setIsOpen(false)}>Log In</Link>
                     </Button>
                     <Button variant="default" size="sm" className="flex-1" asChild>
                       <Link to="/signup" onClick={() => setIsOpen(false)}>Get Started</Link>
