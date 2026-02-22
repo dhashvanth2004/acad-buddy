@@ -49,7 +49,7 @@ const StudentDashboard = () => {
 
   useEffect(() => {
     if (!loading && !user) {
-      navigate("/login");
+      navigate("/");
     }
   }, [user, loading, navigate]);
 

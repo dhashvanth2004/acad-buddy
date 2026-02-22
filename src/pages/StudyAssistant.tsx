@@ -48,7 +48,7 @@ const StudyAssistant = () => {
         description: "Please sign in to use the Study Assistant.",
         variant: "destructive",
       });
-      navigate("/login");
+      navigate("/");
     }
   }, [user, authLoading, navigate, toast]);
 
