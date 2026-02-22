@@ -1,6 +1,6 @@
 ## Project info
 
-**URL** : getacadbuddy.lovable.app
+**URL** : [getacadbuddy.lovable.app](https://getacadbuddy.lovable.app/)
 
 # AcadBuddy
 
