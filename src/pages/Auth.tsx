@@ -47,7 +47,7 @@ const Auth = ({ mode }: AuthProps) => {
         if (userRole === "mentor") {
           navigate("/mentor-dashboard");
         } else {
-          navigate("/dashboard");
+          navigate("/home");
         }
       };
       
