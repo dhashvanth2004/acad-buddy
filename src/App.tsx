@@ -29,7 +29,7 @@ const App = () => (
       <BrowserRouter>
         <AuthProvider>
           <Routes>
-            <Route path="/" element={<Auth mode="login" />} />
+            <Route path="/" element={<Index />} />
             <Route path="/login" element={<Auth mode="login" />} />
             <Route path="/home" element={<Index />} />
             <Route path="/mentors" element={<Mentors />} />
