@@ -108,7 +108,7 @@ const Auth = ({ mode }: AuthProps) => {
             title: "Welcome back!",
             description: "You have successfully logged in.",
           });
-          navigate("/");
+          // Redirect will be handled by useEffect after auth state changes
         }
       } else {
         const { error } = await signUp(email, password, fullName, role);
@@ -129,9 +129,8 @@ const Auth = ({ mode }: AuthProps) => {
         } else {
           toast({
             title: "Account created!",
-            description: "Welcome to AcadBuddy. Let's get started!",
+            description: "Please check your email to verify your account before logging in.",
           });
-          navigate("/");
         }
       }
     } finally {
