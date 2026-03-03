@@ -40,14 +40,14 @@ const Navbar = () => {
   }, [user]);
 
   const navLinks = [
-    { name: "Home", href: "/home" },
+    { name: "Home", href: "/" },
     { name: "Find Mentors", href: "/mentors", scrollToTop: true },
     { name: "Study Assistant", href: "/study-assistant" },
-    { name: "How It Works", href: "/home", hash: "how-it-works" },
+    { name: "How It Works", href: "/", hash: "how-it-works" },
   ].filter(Boolean);
 
   const handleHowItWorksClick = () => {
-    navigate("/home");
+    navigate("/");
     setTimeout(() => {
       const element = document.getElementById("how-it-works");
       if (element) {
