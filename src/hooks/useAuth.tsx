@@ -59,12 +59,35 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    
-    return { error: error as Error | null };
+    try {
+      console.log('[AUTH] Starting sign in...');
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      
+      console.log('[AUTH] Sign in response:', { 
+        hasData: !!data, 
+        hasUser: !!data?.user,
+        hasSession: !!data?.session,
+        error: error?.message 
+      });
+      
+      if (error) {
+        console.error('[AUTH] Sign in error:', error);
+      }
+      
+      return { error: error as Error | null };
+    } catch (err) {
+      console.error('[AUTH] Sign in exception:', err);
+      return { 
+        error: new Error(
+          err instanceof Error && err.message.includes('fetch')
+            ? 'Network error: Unable to connect to authentication server. Please check your internet connection and try again.'
+            : err instanceof Error ? err.message : 'An unexpected error occurred during sign in.'
+        ) 
+      };
+    }
   };
 
   const signOut = async () => {

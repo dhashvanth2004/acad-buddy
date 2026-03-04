@@ -35,6 +35,7 @@ const Auth = ({ mode }: AuthProps) => {
   // Redirect if already logged in
   useEffect(() => {
     if (user && !authLoading) {
+      console.log('[AUTH PAGE useEffect] User detected, redirecting...', { userId: user.id });
       // Fetch user role and redirect to appropriate dashboard
       const redirectUser = async () => {
         const { data } = await supabase
@@ -42,15 +43,17 @@ const Auth = ({ mode }: AuthProps) => {
           .select("role")
           .eq("user_id", user.id)
           .maybeSingle();
-        
+
         const userRole = data?.role;
+        console.log('[AUTH PAGE useEffect] Redirecting to:', userRole === "mentor" ? "/mentor-dashboard" : "/home");
+
         if (userRole === "mentor") {
-          navigate("/mentor-dashboard");
+          navigate("/mentor-dashboard", { replace: true });
         } else {
-          navigate("/home");
+          navigate("/home", { replace: true });
         }
       };
-      
+
       redirectUser();
     }
   }, [user, authLoading, navigate]);
@@ -81,15 +84,19 @@ const Auth = ({ mode }: AuthProps) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) return;
-    
+
     setLoading(true);
 
     try {
       if (mode === "login") {
+        console.log('[AUTH PAGE] Attempting login...');
         const { error } = await signIn(email, password);
+        console.log('[AUTH PAGE] Login response:', { hasError: !!error });
+
         if (error) {
+          console.error('[AUTH PAGE] Login error:', error.message);
           if (error.message.includes("Invalid login credentials")) {
             toast({
               variant: "destructive",
@@ -104,14 +111,37 @@ const Auth = ({ mode }: AuthProps) => {
             });
           }
         } else {
+          console.log('[AUTH PAGE] Login successful, getting user role...');
           toast({
             title: "Welcome back!",
             description: "You have successfully logged in.",
           });
-          // Redirect will be handled by useEffect after auth state changes
+
+          // Wait a moment for auth state to update, then redirect
+          setTimeout(async () => {
+            const { data: { user } } = await supabase.auth.getUser();
+            console.log('[AUTH PAGE] Current user after login:', { userId: user?.id });
+
+            if (user) {
+              const { data } = await supabase
+                .from("profiles")
+                .select("role")
+                .eq("user_id", user.id)
+                .maybeSingle();
+
+              const userRole = data?.role;
+              console.log('[AUTH PAGE] User role:', userRole);
+
+              if (userRole === "mentor") {
+                navigate("/mentor-dashboard");
+              } else {
+                navigate("/home");
+              }
+            }
+          }, 500);
         }
       } else {
-        const { error } = await signUp(email, password, fullName, role);
+        const { error } = await signUp(email, password, fullName, "student");
         if (error) {
           if (error.message.includes("User already registered")) {
             toast({

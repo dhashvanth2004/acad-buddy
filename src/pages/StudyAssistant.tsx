@@ -10,13 +10,20 @@ import Footer from "@/components/Footer";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { logger, getErrorMessage } from "@/lib/error-logger";
 
 interface Message {
   role: "user" | "assistant";
   content: string;
 }
 
-const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/study-assistant`;
+const supabaseUrl =
+  import.meta.env.VITE_SUPABASE_URL ||
+  (import.meta.env.VITE_SUPABASE_PROJECT_ID
+    ? `https://${import.meta.env.VITE_SUPABASE_PROJECT_ID}.supabase.co`
+    : "");
+
+const CHAT_URL = `${supabaseUrl}/functions/v1/study-assistant`;
 
 const suggestedQuestions = [
   "How do I solve quadratic equations?",
@@ -140,10 +147,12 @@ const StudyAssistant = () => {
     try {
       await streamChat(updatedMessages);
     } catch (error) {
-      console.error("Chat error:", error);
+      logger.error("Chat error", error, {
+        component: "StudyAssistant",
+      });
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : "Failed to get response",
+        description: getErrorMessage(error) || "Failed to get response",
         variant: "destructive",
       });
     } finally {

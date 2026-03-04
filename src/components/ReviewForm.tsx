@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Star, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { logger, getErrorMessage } from "@/lib/error-logger";
 
 interface ReviewFormProps {
   sessionId: string;
@@ -39,11 +40,19 @@ const ReviewForm = ({ sessionId, mentorId, studentId, onReviewSubmitted }: Revie
 
       toast({ title: "Review submitted!", description: "Thank you for your feedback." });
       onReviewSubmitted();
-    } catch (error: any) {
+    } catch (error) {
+      logger.error("Failed to submit review", error, {
+        component: "ReviewForm",
+        sessionId,
+        mentorId,
+      });
+      const errorMessage = getErrorMessage(error);
       toast({
         variant: "destructive",
         title: "Failed to submit review",
-        description: error.message?.includes("duplicate") ? "You've already reviewed this session." : "Please try again.",
+        description: errorMessage.includes("duplicate") 
+          ? "You've already reviewed this session." 
+          : "Please try again.",
       });
     } finally {
       setSubmitting(false);

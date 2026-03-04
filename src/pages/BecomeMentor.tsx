@@ -3,13 +3,14 @@ import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import {
   Select,
   SelectContent,
@@ -19,6 +20,7 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { GraduationCap, BookOpen, Clock, IndianRupee, X, Loader2, CheckCircle } from "lucide-react";
+import { logger, getErrorMessage } from "@/lib/error-logger";
 import { useToast } from "@/hooks/use-toast";
 
 // Validation schema
@@ -104,6 +106,24 @@ const BecomeMentor = () => {
     }
   }, [user, authLoading, navigate, toast]);
 
+  // Check existing application
+  const { data: application, isLoading: appLoading } = useQuery({
+    queryKey: ["mentor_application", user?.id],
+    queryFn: async () => {
+      // @ts-ignore
+      const { data, error } = await supabase
+        .from("mentor_applications")
+        .select("*")
+        .eq("user_id", user!.id)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (error && error.code !== "PGRST116") throw error;
+      return data;
+    },
+    enabled: !!user,
+  });
+
   const addSubject = (subject: string) => {
     const trimmed = subject.trim();
     if (trimmed && !subjects.includes(trimmed) && subjects.length < 10) {
@@ -157,43 +177,69 @@ const BecomeMentor = () => {
     setLoading(true);
 
     try {
-      // Update the user's profile to mentor role with all the details
+      // @ts-ignore
       const { error } = await supabase
-        .from("profiles")
-        .update({
+        .from("mentor_applications")
+        .insert({
+          user_id: user.id,
           full_name: fullName,
-          role: "mentor",
           department,
           year,
           bio,
           subjects,
           hourly_rate: hourlyRate,
-        })
-        .eq("user_id", user.id);
+          availability,
+        });
 
       if (error) throw error;
 
       toast({
         title: "Application submitted!",
-        description: "Welcome to the AcadBuddy mentor community. Your profile is now live!",
+        description: "Your mentor application has been securely submitted for administrative review.",
       });
 
-      navigate("/mentors");
-    } catch (error: any) {
+      // Reload window to show pending state
+      window.location.reload();
+    } catch (error) {
+      logger.error("Failed to submit mentor application", error, {
+        component: "BecomeMentor",
+        userId: user.id,
+      });
       toast({
         variant: "destructive",
         title: "Error",
-        description: error.message || "Failed to submit application. Please try again.",
+        description: getErrorMessage(error) || "Failed to submit application. Please try again.",
       });
     } finally {
       setLoading(false);
     }
   };
 
-  if (authLoading) {
+  if (authLoading || appLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (application && (application as any).status === "pending") {
+    return (
+      <div className="min-h-screen bg-background flex flex-col">
+        <Navbar />
+        <div className="container mx-auto px-4 py-24 text-center max-w-md flex-1 flex flex-col items-center justify-center">
+          <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
+            <Clock className="w-8 h-8 text-primary auto-pulse" />
+          </div>
+          <h2 className="text-2xl font-bold mb-4">Application Under Review</h2>
+          <p className="text-muted-foreground mb-8">
+            Your mentor application has been received and is currently being scrutinized by our administration team. You will have full access once approved!
+          </p>
+          <Button onClick={() => navigate("/dashboard")} className="w-full max-w-xs">
+            Back to Dashboard
+          </Button>
+        </div>
+        <Footer />
       </div>
     );
   }

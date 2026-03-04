@@ -2,8 +2,40 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+const env = import.meta.env;
+
+// Helper to check if a value is a valid non-empty string
+const isValidString = (val: unknown): val is string => {
+  return typeof val === 'string' && val.trim() !== '' && val !== 'undefined';
+};
+
+const SUPABASE_URL = isValidString(env.VITE_SUPABASE_URL)
+  ? env.VITE_SUPABASE_URL
+  : isValidString(env.VITE_SUPABASE_PROJECT_ID)
+  ? `https://${env.VITE_SUPABASE_PROJECT_ID}.supabase.co`
+  : '';
+
+const SUPABASE_PUBLISHABLE_KEY = isValidString(env.VITE_SUPABASE_PUBLISHABLE_KEY)
+  ? env.VITE_SUPABASE_PUBLISHABLE_KEY
+  : isValidString(env.VITE_SUPABASE_ANON_KEY)
+  ? env.VITE_SUPABASE_ANON_KEY
+  : '';
+
+if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
+  console.error('Supabase configuration error:', {
+    hasUrl: !!SUPABASE_URL,
+    hasKey: !!SUPABASE_PUBLISHABLE_KEY,
+    envVars: {
+      VITE_SUPABASE_URL: env.VITE_SUPABASE_URL ? '[SET]' : '[MISSING]',
+      VITE_SUPABASE_PROJECT_ID: env.VITE_SUPABASE_PROJECT_ID ? '[SET]' : '[MISSING]',
+      VITE_SUPABASE_PUBLISHABLE_KEY: env.VITE_SUPABASE_PUBLISHABLE_KEY ? '[SET]' : '[MISSING]',
+      VITE_SUPABASE_ANON_KEY: env.VITE_SUPABASE_ANON_KEY ? '[SET]' : '[MISSING]',
+    },
+  });
+  throw new Error(
+    `Supabase configuration incomplete. Please ensure your .env file contains VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY, then restart the dev server.`
+  );
+}
 
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";

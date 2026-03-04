@@ -5,6 +5,7 @@ import { ArrowRight, Sparkles, Users, BookOpen, Star } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { logger } from "@/lib/error-logger";
 
 const HeroSection = () => {
   const { user } = useAuth();
@@ -26,15 +27,18 @@ const HeroSection = () => {
           .eq("role", "mentor");
         
         if (error) {
-          console.error("Error fetching mentor count:", error);
+          logger.error("Error fetching mentor count", error, {
+            component: "HeroSection",
+          });
           return;
         }
         
         const count = data?.length || 0;
-        console.log("Mentor count fetched:", count);
         setActiveMentorCount(count);
       } catch (error) {
-        console.error("Failed to fetch mentors:", error);
+        logger.error("Failed to fetch mentors", error, {
+          component: "HeroSection",
+        });
       }
     };
 

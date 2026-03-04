@@ -14,10 +14,12 @@ import MentorDashboard from "./pages/MentorDashboard";
 import StudyAssistant from "./pages/StudyAssistant";
 import Chat from "./pages/Chat";
 import EditProfile from "./pages/EditProfile";
+import AdminDashboard from "./pages/AdminDashboard";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import PasswordResetSuccess from "./pages/PasswordResetSuccess";
 import NotFound from "./pages/NotFound";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
 
 const queryClient = new QueryClient();
 
@@ -38,12 +40,13 @@ const App = () => (
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/password-reset-success" element={<PasswordResetSuccess />} />
-            <Route path="/become-mentor" element={<BecomeMentor />} />
-            <Route path="/dashboard" element={<StudentDashboard />} />
-            <Route path="/mentor-dashboard" element={<MentorDashboard />} />
-            <Route path="/study-assistant" element={<StudyAssistant />} />
-            <Route path="/chat" element={<Chat />} />
-            <Route path="/edit-profile" element={<EditProfile />} />
+            <Route path="/become-mentor" element={<ProtectedRoute><BecomeMentor /></ProtectedRoute>} />
+            <Route path="/dashboard" element={<ProtectedRoute><StudentDashboard /></ProtectedRoute>} />
+            <Route path="/mentor-dashboard" element={<ProtectedRoute><MentorDashboard /></ProtectedRoute>} />
+            <Route path="/study-assistant" element={<ProtectedRoute><StudyAssistant /></ProtectedRoute>} />
+            <Route path="/chat" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
+            <Route path="/edit-profile" element={<ProtectedRoute><EditProfile /></ProtectedRoute>} />
+            <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
