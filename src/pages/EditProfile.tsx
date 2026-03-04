@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
-import { logger,GetErrorMessage } from "@/lib/error-logger";
+import { logger, getErrorMessage } from "@/lib/error-logger";
 import { Save, X, Plus, ArrowLeft } from "lucide-react";
 
 const EditProfile = () => {
