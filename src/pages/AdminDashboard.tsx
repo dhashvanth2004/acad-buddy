@@ -17,7 +17,7 @@ export default function AdminDashboard() {
     useEffect(() => {
         const checkAdmin = async () => {
             if (!user) return;
-            const { data } = await supabase.from("profiles").select("is_admin").eq("user_id", user.id).single();
+            const { data } = await supabase.from("profiles").select("is_admin").eq("user_id", user.id).single() as any;
             setIsAdmin(!!data?.is_admin);
         };
         checkAdmin();
@@ -26,7 +26,7 @@ export default function AdminDashboard() {
     const { data: apps, isLoading } = useQuery({
         queryKey: ["admin_applications"],
         queryFn: async () => {
-            const { data, error } = await supabase.from("mentor_applications").select("*").order("created_at", { ascending: false });
+            const { data, error } = await (supabase as any).from("mentor_applications").select("*").order("created_at", { ascending: false });
             if (error) throw error;
             return data;
         },
@@ -36,7 +36,7 @@ export default function AdminDashboard() {
     const updateAppMutation = useMutation({
         mutationFn: async ({ id, action }: { id: string, action: 'approve' | 'reject' }) => {
             const rpcName = action === 'approve' ? 'approve_mentor_application' : 'reject_mentor_application';
-            const { error } = await supabase.rpc(rpcName, { app_id: id });
+            const { error } = await (supabase as any).rpc(rpcName, { app_id: id });
             if (error) throw error;
             return action;
         },
