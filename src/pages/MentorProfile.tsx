@@ -191,7 +191,7 @@ const MentorProfile = () => {
   const [reviewStats, setReviewStats] = useState<{ avg: number; count: number }>({ avg: 0, count: 0 });
   const [message, setMessage] = useState("");
   const [sendingMessage, setSendingMessage] = useState(false);
-  
+
   // Booking state
   const [bookingOpen, setBookingOpen] = useState(false);
   const [bookingDate, setBookingDate] = useState<Date | undefined>(undefined);
@@ -273,7 +273,7 @@ const MentorProfile = () => {
     }
 
     setSendingMessage(true);
-    
+
     try {
       const { error } = await supabase
         .from('messages')
@@ -284,12 +284,12 @@ const MentorProfile = () => {
         });
 
       if (error) throw error;
-      
+
       toast({
         title: "Message sent!",
         description: `Your message has been sent to ${mentor?.full_name}. They'll get back to you soon!`,
       });
-      
+
       setMessage("");
       // Navigate to chat with this mentor
       navigate(`/chat?with=${mentor.user_id}`);
@@ -427,11 +427,12 @@ const MentorProfile = () => {
       {/* Profile Header */}
       <section className="pb-8">
         <div className="container mx-auto px-4">
-          <div className="bg-gradient-to-br from-primary/10 via-accent/5 to-background rounded-3xl p-8 md:p-12">
-            <div className="flex flex-col md:flex-row gap-8 items-start">
+          <div className="bg-card rounded-2xl p-8 md:p-12 border border-border shadow-sm relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none" />
+            <div className="flex flex-col md:flex-row gap-8 items-start relative">
               {/* Avatar */}
               <div className="flex-shrink-0">
-                <Avatar className="w-32 h-32 md:w-40 md:h-40 border-4 border-background shadow-xl">
+                <Avatar className="w-32 h-32 md:w-40 md:h-40 border-4 border-background shadow-md">
                   <AvatarImage src={mentor.avatar_url || undefined} alt={mentor.full_name || "Mentor"} />
                   <AvatarFallback className="text-4xl gradient-primary text-primary-foreground">
                     {getInitials(mentor.full_name)}
@@ -463,11 +464,10 @@ const MentorProfile = () => {
                       {[...Array(5)].map((_, i) => (
                         <Star
                           key={i}
-                          className={`w-5 h-5 ${
-                            i < Math.floor(mentor.rating || 0)
+                          className={`w-5 h-5 ${i < Math.floor(mentor.rating || 0)
                               ? "text-accent fill-current"
                               : "text-muted-foreground/30"
-                          }`}
+                            }`}
                         />
                       ))}
                     </div>
@@ -502,8 +502,8 @@ const MentorProfile = () => {
             {/* Left Column - Details */}
             <div className="lg:col-span-2 space-y-8">
               {/* About */}
-              <Card>
-                <CardHeader>
+              <Card className="shadow-sm border-border/60">
+                <CardHeader className="border-b border-border/40 bg-card/50 pb-4">
                   <CardTitle className="flex items-center gap-2">
                     <User className="w-5 h-5" />
                     About Me
@@ -517,8 +517,8 @@ const MentorProfile = () => {
               </Card>
 
               {/* Subjects */}
-              <Card>
-                <CardHeader>
+              <Card className="shadow-sm border-border/60">
+                <CardHeader className="border-b border-border/40 bg-card/50 pb-4">
                   <CardTitle className="flex items-center gap-2">
                     <BookOpen className="w-5 h-5" />
                     Subjects I Teach
@@ -528,7 +528,7 @@ const MentorProfile = () => {
                   {mentor.subjects && mentor.subjects.length > 0 ? (
                     <div className="flex flex-wrap gap-3">
                       {mentor.subjects.map((subject) => (
-                        <Badge key={subject} variant="subject" className="text-sm py-1.5 px-4">
+                        <Badge key={subject} variant="secondary" className="text-sm py-1.5 px-4 font-medium transition-colors hover:bg-secondary">
                           {subject}
                         </Badge>
                       ))}
@@ -545,8 +545,8 @@ const MentorProfile = () => {
 
             {/* Right Column - Contact Card */}
             <div className="lg:col-span-1">
-              <Card className="sticky top-24 shadow-card">
-                <CardHeader>
+              <Card className="sticky top-24 shadow-card border-border/60">
+                <CardHeader className="pb-4">
                   <CardTitle className="flex items-center gap-2">
                     <Mail className="w-5 h-5" />
                     Contact {mentor.full_name?.split(" ")[0]}
@@ -556,13 +556,13 @@ const MentorProfile = () => {
                   <p className="text-sm text-muted-foreground">
                     Send a message to introduce yourself and discuss your learning goals.
                   </p>
-                  
+
                   <Textarea
                     placeholder={`Hi ${mentor.full_name?.split(" ")[0]}, I'm interested in learning...`}
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
                     rows={4}
-                    className="resize-none"
+                    className="resize-none bg-background/50 focus:bg-background transition-colors"
                   />
 
                   <Button
@@ -626,10 +626,10 @@ const MentorProfile = () => {
                           Schedule a mentoring session. Choose your preferred date and time.
                         </DialogDescription>
                       </DialogHeader>
-                      <div className="space-y-4 py-4">
+                      <div className="space-y-4 py-2">
                         {/* Date Picker */}
                         <div className="space-y-2">
-                          <Label>Select Date</Label>
+                          <Label className="text-foreground/80 font-medium">Select Date</Label>
                           <Popover>
                             <PopoverTrigger asChild>
                               <Button
@@ -739,7 +739,7 @@ const MentorProfile = () => {
                         )}
 
                         <Button
-                          className="w-full gap-2"
+                          className="w-full gap-2 font-medium"
                           onClick={handleBookSession}
                           disabled={bookingLoading}
                         >

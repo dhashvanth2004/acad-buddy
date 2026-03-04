@@ -75,7 +75,7 @@ const Mentors = () => {
   useEffect(() => {
     const fetchMentors = async () => {
       setLoading(true);
-      
+
       const { data, error } = await supabase
         .from("profiles")
         .select("*")
@@ -232,169 +232,158 @@ const Mentors = () => {
         </div>
       </section>
 
-      {/* Search & Filters */}
-      <section className="py-6 border-b border-border sticky top-16 bg-background/95 backdrop-blur-sm z-40">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row gap-4 items-center">
-            {/* Search Input */}
-            <div className="relative flex-1 w-full">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-              <Input
-                placeholder="Search by name, subject, or department..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-              />
-            </div>
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* Left Sidebar - Filters */}
+          <aside className="w-full lg:w-1/4">
+            <div className="sticky top-24 space-y-6">
+              <div className="p-6 bg-card rounded-xl border border-border shadow-sm">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-lg font-semibold flex items-center gap-2">
+                    <SlidersHorizontal className="w-4 h-4 text-primary" />
+                    Filters
+                  </h2>
+                  {hasActiveFilters && (
+                    <Button variant="ghost" size="sm" onClick={clearFilters} className="h-8 px-2 text-muted-foreground hover:text-foreground">
+                      <X className="w-4 h-4 mr-1" />
+                      Clear all
+                    </Button>
+                  )}
+                </div>
 
-            {/* Sort */}
-            <Select value={sortBy} onValueChange={setSortBy}>
-              <SelectTrigger className="w-full md:w-48">
-                <SelectValue placeholder="Sort by" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="rating">Highest Rated</SelectItem>
-                <SelectItem value="reviews">Most Reviews</SelectItem>
-                <SelectItem value="price-low">Price: Low to High</SelectItem>
-                <SelectItem value="price-high">Price: High to Low</SelectItem>
-              </SelectContent>
-            </Select>
+                <div className="space-y-6">
+                  {/* Search Input */}
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Search mentors..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="pl-9 bg-background/50 focus:bg-background transition-colors"
+                    />
+                  </div>
 
-            {/* Filter Toggle */}
-            <Button
-              variant={showFilters ? "default" : "outline"}
-              onClick={() => setShowFilters(!showFilters)}
-              className="gap-2"
-            >
-              <SlidersHorizontal className="w-4 h-4" />
-              Filters
-              {hasActiveFilters && (
-                <Badge variant="secondary" className="ml-1">
-                  Active
-                </Badge>
-              )}
-            </Button>
-          </div>
+                  {/* Department */}
+                  <div>
+                    <label className="text-sm font-medium mb-3 block text-foreground/80">Department</label>
+                    <Select value={selectedDepartment} onValueChange={setSelectedDepartment}>
+                      <SelectTrigger className="bg-background/50">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {departments.map((dept) => (
+                          <SelectItem key={dept} value={dept}>
+                            {dept}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
 
-          {/* Expanded Filters */}
-          {showFilters && (
-            <div className="mt-6 p-6 bg-card rounded-xl border border-border animate-fade-in">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="font-semibold">Filters</h3>
-                {hasActiveFilters && (
-                  <Button variant="ghost" size="sm" onClick={clearFilters} className="gap-1">
-                    <X className="w-4 h-4" />
-                    Clear all
-                  </Button>
-                )}
-              </div>
+                  {/* Price Range */}
+                  <div className="pt-2">
+                    <label className="text-sm font-medium mb-4 flex justify-between text-foreground/80">
+                      <span>Hourly Rate</span>
+                      <span className="text-primary font-semibold">₹{priceRange[0]} - ₹{priceRange[1]}</span>
+                    </label>
+                    <Slider
+                      value={priceRange}
+                      onValueChange={setPriceRange}
+                      max={500}
+                      step={10}
+                      className="mt-2"
+                    />
+                  </div>
 
-              <div className="grid md:grid-cols-3 gap-6">
-                {/* Department */}
-                <div>
-                  <label className="text-sm font-medium mb-2 block">Department</label>
-                  <Select value={selectedDepartment} onValueChange={setSelectedDepartment}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {departments.map((dept) => (
-                        <SelectItem key={dept} value={dept}>
-                          {dept}
-                        </SelectItem>
+                  {/* Subjects */}
+                  <div className="pt-2 pb-2">
+                    <label className="text-sm font-medium mb-3 block text-foreground/80">Popular Subjects</label>
+                    <div className="flex flex-wrap gap-2">
+                      {subjects.slice(0, 8).map((subject) => (
+                        <Badge
+                          key={subject}
+                          variant={selectedSubjects.includes(subject) ? "default" : "outline"}
+                          className={`cursor-pointer transition-all hover:scale-[1.02] ${selectedSubjects.includes(subject) ? 'shadow-sm' : 'hover:bg-primary/5 hover:border-primary/30'}`}
+                          onClick={() => toggleSubject(subject)}
+                        >
+                          {subject}
+                        </Badge>
                       ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Price Range */}
-                <div>
-                  <label className="text-sm font-medium mb-2 block">
-                    Price Range: ₹{priceRange[0]} - ₹{priceRange[1]}/hr
-                  </label>
-                  <Slider
-                    value={priceRange}
-                    onValueChange={setPriceRange}
-                    max={500}
-                    step={10}
-                    className="mt-4"
-                  />
-                </div>
-
-                {/* Subjects */}
-                <div>
-                  <label className="text-sm font-medium mb-2 block">Popular Subjects</label>
-                  <div className="flex flex-wrap gap-2 max-h-24 overflow-y-auto">
-                    {subjects.slice(0, 8).map((subject) => (
-                      <Badge
-                        key={subject}
-                        variant={selectedSubjects.includes(subject) ? "default" : "outline"}
-                        className="cursor-pointer hover:bg-primary/10 transition-colors"
-                        onClick={() => toggleSubject(subject)}
-                      >
-                        {subject}
-                      </Badge>
-                    ))}
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          )}
-        </div>
-      </section>
+          </aside>
 
-      {/* Results */}
-      <section className="py-12">
-        <div className="container mx-auto px-4">
-          {loading ? (
-            <div className="flex items-center justify-center py-16">
-              <Loader2 className="w-8 h-8 animate-spin text-primary" />
-            </div>
-          ) : (
-            <>
-              <div className="flex items-center justify-between mb-8">
-                <p className="text-muted-foreground">
-                  Showing <span className="font-semibold text-foreground">{filteredMentors.length}</span>{" "}
-                  {filteredMentors.length === 1 ? "mentor" : "mentors"}
-                </p>
+          {/* Right Content - Results */}
+          <main className="w-full lg:w-3/4">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
+              <p className="text-muted-foreground text-sm font-medium">
+                Showing <span className="font-semibold text-foreground">{filteredMentors.length}</span>{" "}
+                {filteredMentors.length === 1 ? "mentor" : "mentors"}
+              </p>
+
+              {/* Sort */}
+              <div className="flex items-center gap-3 w-full sm:w-auto">
+                <span className="text-sm text-muted-foreground font-medium hidden sm:inline-block">Sort by:</span>
+                <Select value={sortBy} onValueChange={setSortBy}>
+                  <SelectTrigger className="w-full sm:w-48 bg-card shadow-sm border-border">
+                    <SelectValue placeholder="Sort by" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="rating">Highest Rated</SelectItem>
+                    <SelectItem value="reviews">Most Reviews</SelectItem>
+                    <SelectItem value="price-low">Price: Low to High</SelectItem>
+                    <SelectItem value="price-high">Price: High to Low</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
+            </div>
 
-              {filteredMentors.length > 0 ? (
-                <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                  {filteredMentors.map((mentor, index) => (
-                    <div
-                      key={mentor.id}
-                      className="animate-fade-in"
-                      style={{ animationDelay: `${index * 0.05}s` }}
-                    >
-                      <MentorCard {...mentor} />
-                    </div>
-                  ))}
+            {loading ? (
+              <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-6">
+                {[1, 2, 3, 4, 5, 6].map((i) => (
+                  <div key={i} className="h-80 bg-card rounded-xl border border-border/60 animate-pulse shadow-sm" />
+                ))}
+              </div>
+            ) : filteredMentors.length > 0 ? (
+              <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-6">
+                {filteredMentors.map((mentor, index) => (
+                  <div
+                    key={mentor.id}
+                    className="animate-fade-in"
+                    style={{ animationDelay: `${index * 0.05}s` }}
+                  >
+                    <MentorCard {...mentor} />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-20 bg-card border border-dashed rounded-xl border-border">
+                <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Search className="w-8 h-8 text-muted-foreground/60" />
                 </div>
-              ) : (
-                <div className="text-center py-16">
-                  <div className="text-6xl mb-4">🔍</div>
-                  <h3 className="text-xl font-semibold mb-2">No mentors found</h3>
-                  <p className="text-muted-foreground mb-4">
-                    {mentors.length === 0
-                      ? "Be the first to become a mentor!"
-                      : "Try adjusting your filters or search query"}
-                  </p>
-                  {mentors.length === 0 ? (
-                    <Button asChild>
-                      <a href="/become-mentor">Become a Mentor</a>
-                    </Button>
-                  ) : (
-                    <Button variant="outline" onClick={clearFilters}>
-                      Clear Filters
-                    </Button>
-                  )}
-                </div>
-              )}
-            </>
-          )}
+                <h3 className="text-xl font-semibold mb-2 text-foreground">No mentors found</h3>
+                <p className="text-muted-foreground mb-6 max-w-sm mx-auto">
+                  {mentors.length === 0
+                    ? "Be the first to become a mentor upon the platform!"
+                    : "Try adjusting your filters, clearing subjects, or broadening your search query."}
+                </p>
+                {mentors.length === 0 ? (
+                  <Button asChild className="shadow-sm">
+                    <a href="/become-mentor">Become a Mentor</a>
+                  </Button>
+                ) : (
+                  <Button variant="outline" onClick={clearFilters} className="bg-background">
+                    Clear All Filters
+                  </Button>
+                )}
+              </div>
+            )}
+          </main>
         </div>
-      </section>
+      </div>
 
       <Footer />
     </div>

@@ -187,36 +187,32 @@ const Auth = ({ mode }: AuthProps) => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 via-background to-accent/5 p-4">
-      {/* Background Pattern */}
-      <div className="absolute inset-0 -z-10">
-        <div className="absolute top-20 right-20 w-72 h-72 bg-primary/10 rounded-full blur-3xl animate-pulse-soft" />
-        <div className="absolute bottom-20 left-20 w-96 h-96 bg-accent/10 rounded-full blur-3xl animate-pulse-soft" style={{ animationDelay: '1s' }} />
-      </div>
+    <div className="min-h-screen flex w-full bg-background">
+      {/* Left Side: Form */}
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 sm:p-12 animate-fade-in z-10">
+        <div className="w-full max-w-md">
+          {/* Logo */}
+          <Link to="/" className="flex items-center justify-center gap-2 mb-10 group">
+            <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center border border-primary/20 transition-all group-hover:scale-105 group-hover:bg-primary/20">
+              <GraduationCap className="w-7 h-7 text-primary" />
+            </div>
+            <span className="text-2xl font-bold text-foreground tracking-tight">
+              Acad<span className="text-primary">Buddy</span>
+            </span>
+          </Link>
 
-      <div className="w-full max-w-md animate-scale-in">
-        {/* Logo */}
-        <Link to="/" className="flex items-center justify-center gap-2 mb-8 group">
-          <div className="w-12 h-12 gradient-primary rounded-xl flex items-center justify-center shadow-md group-hover:shadow-glow transition-shadow">
-            <GraduationCap className="w-7 h-7 text-primary-foreground" />
-          </div>
-          <span className="text-2xl font-bold text-foreground">
-            Acad<span className="text-primary">Buddy</span>
-          </span>
-        </Link>
+          <div className="space-y-6">
 
-        <Card className="shadow-card">
-          <CardHeader className="text-center">
-            <CardTitle className="text-2xl">
-              {mode === "login" ? "Welcome back" : "Create your account"}
-            </CardTitle>
-            <CardDescription>
-              {mode === "login"
-                ? "Enter your credentials to access your account"
-                : "Join AcadBuddy as a student or mentor"}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
+            <div className="text-center mb-8">
+              <h1 className="text-3xl font-semibold tracking-tight mb-2">
+                {mode === "login" ? "Welcome back" : "Create an account"}
+              </h1>
+              <p className="text-muted-foreground text-sm">
+                {mode === "login"
+                  ? "Enter your credentials to access your dashboard"
+                  : "Join AcadBuddy to connect with top-tier student mentors"}
+              </p>
+            </div>
             <form onSubmit={handleSubmit} className="space-y-4">
               {mode === "signup" && (
                 <div className="space-y-2">
@@ -227,7 +223,7 @@ const Auth = ({ mode }: AuthProps) => {
                     placeholder="John Doe"
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
-                    className={errors.fullName ? "border-destructive" : ""}
+                    className={`bg-background/50 focus:bg-background ${errors.fullName ? "border-destructive" : ""}`}
                   />
                   {errors.fullName && (
                     <p className="text-sm text-destructive">{errors.fullName}</p>
@@ -243,7 +239,7 @@ const Auth = ({ mode }: AuthProps) => {
                   placeholder="you@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className={errors.email ? "border-destructive" : ""}
+                  className={`bg-background/50 focus:bg-background ${errors.email ? "border-destructive" : ""}`}
                 />
                 {errors.email && (
                   <p className="text-sm text-destructive">{errors.email}</p>
@@ -258,7 +254,7 @@ const Auth = ({ mode }: AuthProps) => {
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className={errors.password ? "border-destructive" : ""}
+                  className={`bg-background/50 focus:bg-background ${errors.password ? "border-destructive" : ""}`}
                 />
                 {errors.password && (
                   <p className="text-sm text-destructive">{errors.password}</p>
@@ -355,8 +351,41 @@ const Auth = ({ mode }: AuthProps) => {
                 </p>
               )}
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
+      </div>
+
+      {/* Right Side: Visual */}
+      <div className="hidden lg:flex w-1/2 bg-gradient-to-br from-primary/10 via-primary/5 to-accent/10 items-center justify-center relative overflow-hidden">
+        <div className="absolute inset-0 -z-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-20 mix-blend-overlay" />
+        <div className="absolute top-20 right-20 w-72 h-72 bg-primary/20 rounded-full blur-3xl animate-pulse-soft" />
+        <div className="absolute bottom-20 left-20 w-96 h-96 bg-accent/20 rounded-full blur-3xl animate-pulse-soft" style={{ animationDelay: '1s' }} />
+
+        <div className="max-w-md z-10 text-center space-y-8 animate-fade-in" style={{ animationDelay: '0.2s' }}>
+          <div className="w-24 h-24 bg-card/50 backdrop-blur-sm rounded-3xl flex items-center justify-center mx-auto shadow-xl border border-white/20">
+            <BookOpen className="w-12 h-12 text-primary" />
+          </div>
+          <div className="space-y-4">
+            <h2 className="text-3xl font-bold tracking-tight text-foreground">Unlock your academic potential</h2>
+            <p className="text-lg text-muted-foreground">Join thousands of students connecting with experienced mentors to achieve their learning goals faster.</p>
+          </div>
+          <div className="flex items-center justify-center gap-4 text-sm font-medium text-muted-foreground p-6 bg-card/30 backdrop-blur-md rounded-2xl border border-white/10">
+            <div className="flex flex-col items-center">
+              <span className="text-xl font-bold text-foreground">500+</span>
+              <span>Mentors</span>
+            </div>
+            <div className="h-8 w-px bg-border/50" />
+            <div className="flex flex-col items-center">
+              <span className="text-xl font-bold text-foreground">10k+</span>
+              <span>Sessions</span>
+            </div>
+            <div className="h-8 w-px bg-border/50" />
+            <div className="flex flex-col items-center">
+              <span className="text-xl font-bold text-foreground">4.9/5</span>
+              <span>Avg Rating</span>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

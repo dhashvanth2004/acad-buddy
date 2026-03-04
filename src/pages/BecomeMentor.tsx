@@ -252,8 +252,8 @@ const BecomeMentor = () => {
       <section className="pt-24 pb-12 bg-gradient-to-b from-primary/5 to-background">
         <div className="container mx-auto px-4">
           <div className="text-center max-w-2xl mx-auto animate-slide-up">
-            <div className="w-16 h-16 gradient-primary rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
-              <GraduationCap className="w-8 h-8 text-primary-foreground" />
+            <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-sm border border-primary/20">
+              <GraduationCap className="w-8 h-8 text-primary" />
             </div>
             <h1 className="text-3xl md:text-4xl font-bold mb-4">Become a Mentor</h1>
             <p className="text-muted-foreground">
@@ -293,7 +293,7 @@ const BecomeMentor = () => {
       {/* Form */}
       <section className="py-12">
         <div className="container mx-auto px-4">
-          <Card className="max-w-2xl mx-auto shadow-card animate-fade-in">
+          <Card className="max-w-2xl mx-auto shadow-sm border-border animate-fade-in bg-card">
             <CardHeader>
               <CardTitle>Complete Your Mentor Profile</CardTitle>
               <CardDescription>
@@ -320,7 +320,7 @@ const BecomeMentor = () => {
                         placeholder="Your full name"
                         value={fullName}
                         onChange={(e) => setFullName(e.target.value)}
-                        className={errors.fullName ? "border-destructive" : ""}
+                        className={`bg-background/50 focus:bg-background transition-colors ${errors.fullName ? "border-destructive" : ""}`}
                       />
                       {errors.fullName && (
                         <p className="text-sm text-destructive">{errors.fullName}</p>
@@ -382,7 +382,7 @@ const BecomeMentor = () => {
                         value={subjectInput}
                         onChange={(e) => setSubjectInput(e.target.value)}
                         onKeyDown={handleSubjectKeyDown}
-                        className={errors.subjects ? "border-destructive" : ""}
+                        className={`bg-background/50 focus:bg-background transition-colors ${errors.subjects ? "border-destructive" : ""}`}
                       />
                       <Button
                         type="button"
@@ -451,7 +451,7 @@ const BecomeMentor = () => {
                       value={bio}
                       onChange={(e) => setBio(e.target.value)}
                       rows={4}
-                      className={errors.bio ? "border-destructive" : ""}
+                      className={`resize-none bg-background/50 focus:bg-background transition-colors ${errors.bio ? "border-destructive" : ""}`}
                     />
                     <div className="flex justify-between text-sm">
                       {errors.bio ? (
@@ -474,7 +474,7 @@ const BecomeMentor = () => {
                         placeholder="0 for free sessions"
                         value={hourlyRate}
                         onChange={(e) => setHourlyRate(Number(e.target.value))}
-                        className={errors.hourlyRate ? "border-destructive" : ""}
+                        className={`bg-background/50 focus:bg-background transition-colors ${errors.hourlyRate ? "border-destructive" : ""}`}
                       />
                       {errors.hourlyRate && (
                         <p className="text-sm text-destructive">{errors.hourlyRate}</p>
