@@ -14,6 +14,51 @@ export type Database = {
   }
   public: {
     Tables: {
+      mentor_applications: {
+        Row: {
+          availability: string | null
+          bio: string
+          created_at: string
+          department: string
+          full_name: string
+          hourly_rate: number | null
+          id: string
+          status: string | null
+          subjects: string[]
+          updated_at: string
+          user_id: string
+          year: string
+        }
+        Insert: {
+          availability?: string | null
+          bio: string
+          created_at?: string
+          department: string
+          full_name: string
+          hourly_rate?: number | null
+          id?: string
+          status?: string | null
+          subjects: string[]
+          updated_at?: string
+          user_id: string
+          year: string
+        }
+        Update: {
+          availability?: string | null
+          bio?: string
+          created_at?: string
+          department?: string
+          full_name?: string
+          hourly_rate?: number | null
+          id?: string
+          status?: string | null
+          subjects?: string[]
+          updated_at?: string
+          user_id?: string
+          year?: string
+        }
+        Relationships: []
+      }
       mentor_availability: {
         Row: {
           created_at: string
@@ -122,6 +167,7 @@ export type Database = {
           full_name: string | null
           hourly_rate: number | null
           id: string
+          is_admin: boolean | null
           role: Database["public"]["Enums"]["user_role"]
           subjects: string[] | null
           updated_at: string
@@ -136,6 +182,7 @@ export type Database = {
           full_name?: string | null
           hourly_rate?: number | null
           id?: string
+          is_admin?: boolean | null
           role?: Database["public"]["Enums"]["user_role"]
           subjects?: string[] | null
           updated_at?: string
@@ -150,6 +197,7 @@ export type Database = {
           full_name?: string | null
           hourly_rate?: number | null
           id?: string
+          is_admin?: boolean | null
           role?: Database["public"]["Enums"]["user_role"]
           subjects?: string[] | null
           updated_at?: string
@@ -252,7 +300,8 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      approve_mentor_application: { Args: { app_id: string }; Returns: boolean }
+      reject_mentor_application: { Args: { app_id: string }; Returns: boolean }
     }
     Enums: {
       user_role: "student" | "mentor"

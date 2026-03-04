@@ -111,7 +111,7 @@ const BecomeMentor = () => {
     queryKey: ["mentor_application", user?.id],
     queryFn: async () => {
       // @ts-ignore
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from("mentor_applications")
         .select("*")
         .eq("user_id", user!.id)
@@ -178,7 +178,7 @@ const BecomeMentor = () => {
 
     try {
       // @ts-ignore
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from("mentor_applications")
         .insert({
           user_id: user.id,
