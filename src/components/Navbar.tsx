@@ -16,6 +16,7 @@ import { useToast } from "@/hooks/use-toast";
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [userRole, setUserRole] = useState<"student" | "mentor">("student");
+  const [isAdmin, setIsAdmin] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
@@ -24,15 +25,19 @@ const Navbar = () => {
   useEffect(() => {
     const fetchUserRole = async () => {
       if (!user) return;
-      
+
       const { data } = await supabase
         .from("profiles")
-        .select("role")
+        .select("role, is_admin")
         .eq("user_id", user.id)
         .maybeSingle();
-      
-      if (data?.role) {
-        setUserRole(data.role);
+
+      // @ts-ignore
+      if (data) {
+        // @ts-ignore
+        if (data.role) setUserRole(data.role);
+        // @ts-ignore
+        if (data.is_admin) setIsAdmin(true);
       }
     };
 
@@ -98,18 +103,16 @@ const Navbar = () => {
                 ) : link.scrollToTop ? (
                   <button
                     onClick={() => handleScrollToTop(link.href)}
-                    className={`text-sm font-medium transition-colors hover:text-primary ${
-                      location.pathname === link.href ? "text-primary" : "text-muted-foreground"
-                    }`}
+                    className={`text-sm font-medium transition-colors hover:text-primary ${location.pathname === link.href ? "text-primary" : "text-muted-foreground"
+                      }`}
                   >
                     {link.name}
                   </button>
                 ) : (
                   <Link
                     to={link.href}
-                    className={`text-sm font-medium transition-colors hover:text-primary ${
-                      location.pathname === link.href ? "text-primary" : "text-muted-foreground"
-                    }`}
+                    className={`text-sm font-medium transition-colors hover:text-primary ${location.pathname === link.href ? "text-primary" : "text-muted-foreground"
+                      }`}
                   >
                     {link.name}
                   </Link>
@@ -133,22 +136,31 @@ const Navbar = () => {
                     {user.email}
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem 
-                    onClick={() => navigate(userRole === "mentor" ? "/mentor-dashboard" : "/dashboard")} 
+                  {isAdmin && (
+                    <DropdownMenuItem
+                      onClick={() => navigate("/admin")}
+                      className="gap-2 font-semibold text-primary"
+                    >
+                      <LayoutDashboard className="w-4 h-4" />
+                      Admin Dashboard
+                    </DropdownMenuItem>
+                  )}
+                  <DropdownMenuItem
+                    onClick={() => navigate(userRole === "mentor" ? "/mentor-dashboard" : "/dashboard")}
                     className="gap-2"
                   >
                     <LayoutDashboard className="w-4 h-4" />
                     {userRole === "mentor" ? "Mentor Dashboard" : "Dashboard"}
                   </DropdownMenuItem>
-                  <DropdownMenuItem 
-                    onClick={() => navigate("/edit-profile")} 
+                  <DropdownMenuItem
+                    onClick={() => navigate("/edit-profile")}
                     className="gap-2"
                   >
                     <User className="w-4 h-4" />
                     Edit Profile
                   </DropdownMenuItem>
-                  <DropdownMenuItem 
-                    onClick={() => navigate("/chat")} 
+                  <DropdownMenuItem
+                    onClick={() => navigate("/chat")}
                     className="gap-2"
                   >
                     <MessageSquare className="w-4 h-4" />
@@ -222,6 +234,20 @@ const Navbar = () => {
               <div className="flex flex-col gap-3 pt-4 border-t border-border">
                 {user ? (
                   <>
+                    {isAdmin && (
+                      <Button
+                        variant="default"
+                        size="sm"
+                        className="gap-2 w-full"
+                        onClick={() => {
+                          navigate("/admin");
+                          setIsOpen(false);
+                        }}
+                      >
+                        <LayoutDashboard className="w-4 h-4" />
+                        Admin Dashboard
+                      </Button>
+                    )}
                     <Button
                       variant="outline"
                       size="sm"

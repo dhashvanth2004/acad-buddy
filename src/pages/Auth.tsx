@@ -263,48 +263,6 @@ const Auth = ({ mode }: AuthProps) => {
                 )}
               </div>
 
-              {mode === "signup" && (
-                <div className="space-y-3">
-                  <Label>I want to join as</Label>
-                  <RadioGroup
-                    value={role}
-                    onValueChange={(value) => setRole(value as "student" | "mentor")}
-                    className="grid grid-cols-2 gap-4"
-                  >
-                    <div>
-                      <RadioGroupItem
-                        value="student"
-                        id="student"
-                        className="peer sr-only"
-                      />
-                      <Label
-                        htmlFor="student"
-                        className="flex flex-col items-center justify-center rounded-xl border-2 border-muted bg-popover p-4 hover:bg-accent/10 hover:border-primary/50 peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/5 cursor-pointer transition-all"
-                      >
-                        <BookOpen className="mb-2 h-6 w-6 text-primary" />
-                        <span className="font-medium">Student</span>
-                        <span className="text-xs text-muted-foreground">Find mentors</span>
-                      </Label>
-                    </div>
-                    <div>
-                      <RadioGroupItem
-                        value="mentor"
-                        id="mentor"
-                        className="peer sr-only"
-                      />
-                      <Label
-                        htmlFor="mentor"
-                        className="flex flex-col items-center justify-center rounded-xl border-2 border-muted bg-popover p-4 hover:bg-accent/10 hover:border-primary/50 peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/5 cursor-pointer transition-all"
-                      >
-                        <Users className="mb-2 h-6 w-6 text-accent" />
-                        <span className="font-medium">Mentor</span>
-                        <span className="text-xs text-muted-foreground">Help students</span>
-                      </Label>
-                    </div>
-                  </RadioGroup>
-                </div>
-              )}
-
               <Button type="submit" className="w-full" disabled={loading}>
                 {loading ? (
                   <>
