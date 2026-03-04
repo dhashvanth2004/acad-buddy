@@ -42,14 +42,18 @@ const Auth = ({ mode }: AuthProps) => {
       const redirectUser = async () => {
         const { data } = await supabase
           .from("profiles")
-          .select("role")
+          .select("role, is_admin")
           .eq("user_id", user.id)
           .maybeSingle();
 
         const userRole = data?.role;
-        console.log('[AUTH PAGE useEffect] Redirecting to:', userRole === "mentor" ? "/mentor-dashboard" : "/home");
+        // @ts-ignore
+        const isAdmin = data?.is_admin;
+        console.log('[AUTH PAGE useEffect] Redirecting based on role/admin status.');
 
-        if (userRole === "mentor") {
+        if (isAdmin) {
+          navigate("/admin", { replace: true });
+        } else if (userRole === "mentor") {
           navigate("/mentor-dashboard", { replace: true });
         } else {
           navigate("/home", { replace: true });
@@ -127,14 +131,18 @@ const Auth = ({ mode }: AuthProps) => {
             if (user) {
               const { data } = await supabase
                 .from("profiles")
-                .select("role")
+                .select("role, is_admin")
                 .eq("user_id", user.id)
                 .maybeSingle();
 
               const userRole = data?.role;
+              // @ts-ignore
+              const isAdmin = data?.is_admin;
               console.log('[AUTH PAGE] User role:', userRole);
 
-              if (userRole === "mentor") {
+              if (isAdmin) {
+                navigate("/admin");
+              } else if (userRole === "mentor") {
                 navigate("/mentor-dashboard");
               } else {
                 navigate("/home");
