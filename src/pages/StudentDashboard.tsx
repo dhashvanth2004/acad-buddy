@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Calendar, Clock, MessageSquare, User, BookOpen, Star } from "lucide-react";
+import { Calendar, Clock, MessageSquare, User, BookOpen, Star, Video } from "lucide-react";
 import { format } from "date-fns";
 import ReviewForm from "@/components/ReviewForm";
 import { useState } from "react";
@@ -139,6 +139,18 @@ const StudentDashboard = () => {
                         )}
                       </div>
                       <div className="flex items-center gap-2">
+                        <Button
+                          size="sm"
+                          variant="default"
+                          className="gap-1 bg-primary text-primary-foreground hover:bg-primary/90"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(`/room/${session.id}`);
+                          }}
+                        >
+                          <Video className="h-4 w-4 shrink-0" />
+                          <span className="hidden sm:inline">Join</span>
+                        </Button>
                         <Button
                           size="sm"
                           variant="ghost"

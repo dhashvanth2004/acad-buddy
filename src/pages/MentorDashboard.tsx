@@ -23,6 +23,7 @@ import {
   TrendingUp,
   BookOpen,
   MessageSquare,
+  Video,
 } from "lucide-react";
 import { format } from "date-fns";
 
@@ -348,6 +349,15 @@ const MentorDashboard = () => {
                         )}
                       </div>
                       <div className="flex items-center gap-2">
+                        <Button
+                          size="sm"
+                          variant="default"
+                          className="gap-1 bg-primary text-primary-foreground hover:bg-primary/90"
+                          onClick={() => navigate(`/room/${session.id}`)}
+                        >
+                          <Video className="h-4 w-4 shrink-0" />
+                          <span className="hidden sm:inline">Join</span>
+                        </Button>
                         <Button
                           size="sm"
                           variant="ghost"

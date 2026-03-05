@@ -12,6 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
+import NotificationsPopover from "./NotificationsPopover";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -121,54 +122,57 @@ const Navbar = () => {
           {/* Desktop CTA */}
           <div className="hidden md:flex items-center gap-3">
             {user ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm" className="gap-2">
-                    <User className="w-4 h-4" />
-                    Account
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48">
-                  <DropdownMenuItem className="text-muted-foreground text-xs">
-                    {user.email}
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  {isAdmin && (
+              <>
+                <NotificationsPopover />
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="sm" className="gap-2">
+                      <User className="w-4 h-4" />
+                      Account
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48">
+                    <DropdownMenuItem className="text-muted-foreground text-xs">
+                      {user.email}
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    {isAdmin && (
+                      <DropdownMenuItem
+                        onClick={() => navigate("/admin")}
+                        className="gap-2 font-semibold text-primary"
+                      >
+                        <LayoutDashboard className="w-4 h-4" />
+                        Admin Dashboard
+                      </DropdownMenuItem>
+                    )}
                     <DropdownMenuItem
-                      onClick={() => navigate("/admin")}
-                      className="gap-2 font-semibold text-primary"
+                      onClick={() => navigate(userRole === "mentor" ? "/mentor-dashboard" : "/dashboard")}
+                      className="gap-2"
                     >
                       <LayoutDashboard className="w-4 h-4" />
-                      Admin Dashboard
+                      {userRole === "mentor" ? "Mentor Dashboard" : "Dashboard"}
                     </DropdownMenuItem>
-                  )}
-                  <DropdownMenuItem
-                    onClick={() => navigate(userRole === "mentor" ? "/mentor-dashboard" : "/dashboard")}
-                    className="gap-2"
-                  >
-                    <LayoutDashboard className="w-4 h-4" />
-                    {userRole === "mentor" ? "Mentor Dashboard" : "Dashboard"}
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => navigate("/edit-profile")}
-                    className="gap-2"
-                  >
-                    <User className="w-4 h-4" />
-                    Edit Profile
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => navigate("/chat")}
-                    className="gap-2"
-                  >
-                    <MessageSquare className="w-4 h-4" />
-                    Messages
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={handleSignOut} className="gap-2 text-destructive">
-                    <LogOut className="w-4 h-4" />
-                    Sign Out
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+                    <DropdownMenuItem
+                      onClick={() => navigate("/edit-profile")}
+                      className="gap-2"
+                    >
+                      <User className="w-4 h-4" />
+                      Edit Profile
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => navigate("/chat")}
+                      className="gap-2"
+                    >
+                      <MessageSquare className="w-4 h-4" />
+                      Messages
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleSignOut} className="gap-2 text-destructive">
+                      <LogOut className="w-4 h-4" />
+                      Sign Out
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </>
             ) : (
               <>
                 <Button variant="ghost" size="sm" asChild>
