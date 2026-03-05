@@ -110,7 +110,7 @@ const BecomeMentor = () => {
   const { data: application, isLoading: appLoading } = useQuery({
     queryKey: ["mentor_application", user?.id],
     queryFn: async () => {
-      // @ts-ignore
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { data, error } = await (supabase as any)
         .from("mentor_applications")
         .select("*")
@@ -177,7 +177,7 @@ const BecomeMentor = () => {
     setLoading(true);
 
     try {
-      // @ts-ignore
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { error } = await (supabase as any)
         .from("mentor_applications")
         .insert({
@@ -223,6 +223,7 @@ const BecomeMentor = () => {
     );
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   if (application && (application as any).status === "pending") {
     return (
       <div className="min-h-screen bg-background flex flex-col">

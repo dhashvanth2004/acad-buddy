@@ -1,4 +1,6 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useDebounce } from "@/hooks/useDebounce";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -63,67 +65,13 @@ const subjects = [
 ];
 
 const Mentors = () => {
-  const [mentors, setMentors] = useState<Mentor[]>([]);
-  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const debouncedSearch = useDebounce(searchQuery, 300);
   const [selectedDepartment, setSelectedDepartment] = useState("All Departments");
   const [selectedSubjects, setSelectedSubjects] = useState<string[]>([]);
   const [priceRange, setPriceRange] = useState([0, 500]);
   const [sortBy, setSortBy] = useState("rating");
   const [showFilters, setShowFilters] = useState(false);
-
-  useEffect(() => {
-    const fetchMentors = async () => {
-      setLoading(true);
-
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("role", "mentor");
-
-      if (error) {
-        console.error("Error fetching mentors:", error);
-        setLoading(false);
-        return;
-      }
-
-      // Fetch review stats for all mentors
-      const mentorUserIds = (data || []).map((p) => p.user_id);
-      const { data: allReviews } = await supabase
-        .from("reviews")
-        .select("mentor_id, rating")
-        .in("mentor_id", mentorUserIds);
-
-      const reviewMap: Record<string, { sum: number; count: number }> = {};
-      (allReviews || []).forEach((r) => {
-        if (!reviewMap[r.mentor_id]) reviewMap[r.mentor_id] = { sum: 0, count: 0 };
-        reviewMap[r.mentor_id].sum += r.rating;
-        reviewMap[r.mentor_id].count += 1;
-      });
-
-      const formattedMentors: Mentor[] = (data || []).map((profile) => {
-        const stats = reviewMap[profile.user_id];
-        return {
-          id: profile.id,
-          name: profile.full_name || "Anonymous Mentor",
-          avatar: profile.avatar_url || getDefaultAvatar(profile.department),
-          department: profile.department || "General",
-          year: profile.year || "Student",
-          subjects: profile.subjects || [],
-          rating: stats ? stats.sum / stats.count : 0,
-          reviewCount: stats?.count || 0,
-          hourlyRate: profile.hourly_rate || 0,
-          availability: "Flexible",
-          bio: profile.bio || "Experienced mentor ready to help you succeed.",
-        };
-      });
-
-      setMentors(formattedMentors);
-      setLoading(false);
-    };
-
-    fetchMentors();
-  }, []);
 
   const getDefaultAvatar = (department: string | null): string => {
     const avatars: Record<string, string> = {
@@ -142,12 +90,58 @@ const Mentors = () => {
     return avatars[department || ""] || "👨‍🏫";
   };
 
+  const { data: mentors = [], isLoading: loading } = useQuery({
+    queryKey: ["mentors"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("role", "mentor");
+
+      if (error) throw error;
+
+      const mentorUserIds = (data || []).map((p) => p.user_id);
+
+      const reviewMap: Record<string, { sum: number; count: number }> = {};
+      if (mentorUserIds.length > 0) {
+        const { data: allReviews } = await supabase
+          .from("reviews")
+          .select("mentor_id, rating")
+          .in("mentor_id", mentorUserIds);
+
+        (allReviews || []).forEach((r) => {
+          if (!reviewMap[r.mentor_id]) reviewMap[r.mentor_id] = { sum: 0, count: 0 };
+          reviewMap[r.mentor_id].sum += r.rating;
+          reviewMap[r.mentor_id].count += 1;
+        });
+      }
+
+      return (data || []).map((profile) => {
+        const stats = reviewMap[profile.user_id];
+        return {
+          id: profile.id,
+          name: profile.full_name || "Anonymous Mentor",
+          avatar: profile.avatar_url || getDefaultAvatar(profile.department),
+          department: profile.department || "General",
+          year: profile.year || "Student",
+          subjects: profile.subjects || [],
+          rating: stats ? stats.sum / stats.count : 0,
+          reviewCount: stats?.count || 0,
+          hourlyRate: profile.hourly_rate || 0,
+          availability: "Flexible",
+          bio: profile.bio || "Experienced mentor ready to help you succeed.",
+        };
+      });
+    },
+    staleTime: 5 * 60 * 1000 // Cache locally for 5 minutes instead of re-fetching instantly
+  });
+
   const filteredMentors = useMemo(() => {
     let result = [...mentors];
 
     // Search filter
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
+    if (debouncedSearch) {
+      const query = debouncedSearch.toLowerCase();
       result = result.filter(
         (mentor) =>
           mentor.name.toLowerCase().includes(query) ||
@@ -192,7 +186,7 @@ const Mentors = () => {
     }
 
     return result;
-  }, [mentors, searchQuery, selectedDepartment, selectedSubjects, priceRange, sortBy]);
+  }, [mentors, debouncedSearch, selectedDepartment, selectedSubjects, priceRange, sortBy]);
 
   const toggleSubject = (subject: string) => {
     setSelectedSubjects((prev) =>

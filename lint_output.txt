@@ -1,0 +1,4 @@
+
+> template_bun_shadcn_react_vite_bun_ts@0.0.0 lint
+> eslint .
+

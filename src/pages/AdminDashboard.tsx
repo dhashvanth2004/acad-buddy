@@ -8,20 +8,31 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/hooks/use-toast";
-
+import { useNavigate } from "react-router-dom";
 export default function AdminDashboard() {
     const { user } = useAuth();
     const [isAdmin, setIsAdmin] = useState(false);
     const queryClient = useQueryClient();
+    const navigate = useNavigate();
 
     useEffect(() => {
         const checkAdmin = async () => {
             if (!user) return;
             const { data } = await supabase.from("profiles").select("is_admin").eq("user_id", user.id).single() as any;
-            setIsAdmin(!!data?.is_admin);
+
+            if (!data?.is_admin) {
+                toast({
+                    title: "Access Denied",
+                    description: "You must be an administrator to access this console.",
+                    variant: "destructive",
+                });
+                navigate("/dashboard");
+                return;
+            }
+            setIsAdmin(true);
         };
         checkAdmin();
-    }, [user]);
+    }, [user, navigate]);
 
     const { data: apps, isLoading } = useQuery({
         queryKey: ["admin_applications"],

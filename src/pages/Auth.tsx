@@ -47,7 +47,6 @@ const Auth = ({ mode }: AuthProps) => {
           .maybeSingle();
 
         const userRole = data?.role;
-        // @ts-ignore
         const isAdmin = data?.is_admin;
         console.log('[AUTH PAGE useEffect] Redirecting based on role/admin status.');
 
@@ -136,7 +135,6 @@ const Auth = ({ mode }: AuthProps) => {
                 .maybeSingle();
 
               const userRole = data?.role;
-              // @ts-ignore
               const isAdmin = data?.is_admin;
               console.log('[AUTH PAGE] User role:', userRole);
 

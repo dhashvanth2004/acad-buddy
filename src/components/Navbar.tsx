@@ -32,11 +32,8 @@ const Navbar = () => {
         .eq("user_id", user.id)
         .maybeSingle();
 
-      // @ts-ignore
       if (data) {
-        // @ts-ignore
-        if (data.role) setUserRole(data.role);
-        // @ts-ignore
+        if (data.role) setUserRole(data.role as "student" | "mentor");
         if (data.is_admin) setIsAdmin(true);
       }
     };

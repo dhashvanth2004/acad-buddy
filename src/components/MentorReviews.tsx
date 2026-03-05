@@ -23,42 +23,42 @@ const MentorReviews = ({ mentorUserId }: MentorReviewsProps) => {
   const [averageRating, setAverageRating] = useState(0);
 
   useEffect(() => {
+    const fetchReviews = async () => {
+      const { data, error } = await supabase
+        .from("reviews")
+        .select("id, rating, comment, created_at, student_id")
+        .eq("mentor_id", mentorUserId)
+        .order("created_at", { ascending: false });
+
+      if (error || !data) {
+        setLoading(false);
+        return;
+      }
+
+      // Fetch student names
+      const studentIds = [...new Set(data.map((r) => r.student_id))];
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("user_id, full_name")
+        .in("user_id", studentIds);
+
+      const enrichedReviews = data.map((r) => ({
+        id: r.id,
+        rating: r.rating,
+        comment: r.comment,
+        created_at: r.created_at,
+        student_name: profiles?.find((p) => p.user_id === r.student_id)?.full_name || "Anonymous",
+      }));
+
+      setReviews(enrichedReviews);
+      if (enrichedReviews.length > 0) {
+        setAverageRating(enrichedReviews.reduce((sum, r) => sum + r.rating, 0) / enrichedReviews.length);
+      }
+      setLoading(false);
+    };
+
     fetchReviews();
   }, [mentorUserId]);
-
-  const fetchReviews = async () => {
-    const { data, error } = await supabase
-      .from("reviews")
-      .select("id, rating, comment, created_at, student_id")
-      .eq("mentor_id", mentorUserId)
-      .order("created_at", { ascending: false });
-
-    if (error || !data) {
-      setLoading(false);
-      return;
-    }
-
-    // Fetch student names
-    const studentIds = [...new Set(data.map((r) => r.student_id))];
-    const { data: profiles } = await supabase
-      .from("profiles")
-      .select("user_id, full_name")
-      .in("user_id", studentIds);
-
-    const enrichedReviews = data.map((r) => ({
-      id: r.id,
-      rating: r.rating,
-      comment: r.comment,
-      created_at: r.created_at,
-      student_name: profiles?.find((p) => p.user_id === r.student_id)?.full_name || "Anonymous",
-    }));
-
-    setReviews(enrichedReviews);
-    if (enrichedReviews.length > 0) {
-      setAverageRating(enrichedReviews.reduce((sum, r) => sum + r.rating, 0) / enrichedReviews.length);
-    }
-    setLoading(false);
-  };
 
   const getInitials = (name: string | null) => {
     if (!name || name === "Anonymous") return "?";
@@ -119,9 +119,8 @@ const MentorReviews = ({ mentorUserId }: MentorReviewsProps) => {
                     {[1, 2, 3, 4, 5].map((star) => (
                       <Star
                         key={star}
-                        className={`w-3.5 h-3.5 ${
-                          star <= review.rating ? "text-accent fill-current" : "text-muted-foreground/30"
-                        }`}
+                        className={`w-3.5 h-3.5 ${star <= review.rating ? "text-accent fill-current" : "text-muted-foreground/30"
+                          }`}
                       />
                     ))}
                   </div>

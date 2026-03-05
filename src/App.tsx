@@ -23,9 +23,19 @@ const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
 const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const PasswordResetSuccess = lazy(() => import("./pages/PasswordResetSuccess"));
+const ComingSoon = lazy(() => import("./pages/ComingSoon"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000, // 5 minutes cache
+      gcTime: 10 * 60 * 1000, // 10 minutes garbage collection
+      refetchOnWindowFocus: false,
+      retry: 1,
+    },
+  },
+});
 
 // A generic full-screen loading fallback for route transitions
 const PageLoader = () => (
@@ -60,6 +70,16 @@ const App = () => (
               <Route path="/chat" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
               <Route path="/edit-profile" element={<ProtectedRoute><EditProfile /></ProtectedRoute>} />
               <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
+
+              {/* Placeholder Routes for Footer */}
+              <Route path="/about" element={<ComingSoon />} />
+              <Route path="/careers" element={<ComingSoon />} />
+              <Route path="/blog" element={<ComingSoon />} />
+              <Route path="/contact" element={<ComingSoon />} />
+              <Route path="/pricing" element={<ComingSoon />} />
+              <Route path="/privacy" element={<ComingSoon />} />
+              <Route path="/terms" element={<ComingSoon />} />
+              <Route path="/cookies" element={<ComingSoon />} />
 
               {/* Catch-All / 404 */}
               <Route path="*" element={<NotFound />} />

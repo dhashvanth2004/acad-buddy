@@ -7,6 +7,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { format } from "date-fns";
+import DOMPurify from 'dompurify';
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -87,14 +89,16 @@ const StudyAssistant = () => {
       }
 
       // Handle inline bold and italics
+      const rawHtml = part
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.*?)\*/g, '<em>$1</em>')
+        .replace(/`([^`]+)`/g, '<code class="bg-background/60 px-1 py-0.5 rounded text-xs">$1</code>');
+
       return (
         <span
           key={i}
           dangerouslySetInnerHTML={{
-            __html: part
-              .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-              .replace(/\*(.*?)\*/g, '<em>$1</em>')
-              .replace(/`([^`]+)`/g, '<code class="bg-background/60 px-1 py-0.5 rounded text-xs">$1</code>')
+            __html: DOMPurify.sanitize(rawHtml)
           }}
         />
       );
