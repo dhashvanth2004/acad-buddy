@@ -332,21 +332,30 @@ const MentorProfile = () => {
       const scheduledAt = new Date(bookingDate);
       scheduledAt.setHours(hours, minutes, 0, 0);
 
-      const { error } = await supabase.from("sessions").insert({
+      const { data: session, error } = await supabase.from("sessions").insert({
         student_id: user.id,
         mentor_id: mentor?.user_id,
         scheduled_at: scheduledAt.toISOString(),
         duration_minutes: parseInt(bookingDuration),
         subject: bookingSubject || null,
         notes: bookingNotes || null,
-        status: "upcoming",
-      });
+        status: "pending",
+      }).select().single();
 
       if (error) throw error;
 
+      // Trigger email notification to mentor
+      try {
+        await supabase.functions.invoke('session-notifications', {
+          body: { type: 'booking_request', sessionId: session.id }
+        });
+      } catch (e) {
+        console.error("Failed to notify mentor:", e);
+      }
+
       toast({
         title: "Session booked!",
-        description: `Your session with ${mentor?.full_name} has been scheduled for ${format(scheduledAt, "MMMM d, yyyy 'at' h:mm a")}.`,
+        description: `Your session request has been sent to ${mentor?.full_name}. You will be notified when they respond.`,
       });
 
       // Reset form
@@ -465,8 +474,8 @@ const MentorProfile = () => {
                         <Star
                           key={i}
                           className={`w-5 h-5 ${i < Math.floor(mentor.rating || 0)
-                              ? "text-accent fill-current"
-                              : "text-muted-foreground/30"
+                            ? "text-accent fill-current"
+                            : "text-muted-foreground/30"
                             }`}
                         />
                       ))}

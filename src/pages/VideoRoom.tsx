@@ -41,6 +41,18 @@ const VideoRoom = () => {
                 return;
             }
 
+            // Students can only join if it is in progress
+            if (user.id === session.student_id && session.status !== "in_progress") {
+                toast({ title: "Session Not Started", description: "Please wait for the mentor to start the session.", variant: "default" });
+                navigate("/dashboard");
+                return;
+            }
+
+            // Mentors auto-start if it is upcoming
+            if (user.id === session.mentor_id && session.status === "upcoming") {
+                await supabase.from("sessions").update({ status: "in_progress" }).eq("id", sessionId);
+            }
+
             // Generate a secure, deterministic room name based on the session ID
             setRoomName(`AcadBuddy-Session-${sessionId.replace(/-/g, "")}`);
             setIsValidating(false);

@@ -19,6 +19,7 @@
     "test:unit": "vitest"
   },
   "dependencies": {
+    "@emailjs/browser": "^4.4.1",
     "@fontsource/plus-jakarta-sans": "^5.2.8",
     "@hookform/resolvers": "^5.2.2",
     "@jitsi/react-sdk": "^1.4.4",

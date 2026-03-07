@@ -112,8 +112,28 @@ const MentorDashboard = () => {
     }
   });
 
-  const handleSessionAction = (sessionId: string, newStatus: "upcoming" | "cancelled") => {
+  const handleSessionAction = async (sessionId: string, newStatus: "upcoming" | "cancelled") => {
     updateSessionMutation.mutate({ id: sessionId, status: newStatus });
+
+    // Trigger email notification to student
+    try {
+      await supabase.functions.invoke('session-notifications', {
+        body: {
+          type: newStatus === 'upcoming' ? 'booking_accepted' : 'booking_declined',
+          sessionId: sessionId
+        }
+      });
+    } catch (e) {
+      console.error("Failed to notify student", e);
+    }
+  };
+
+  const handleJoinSession = async (sessionId: string, currentStatus: string) => {
+    if (currentStatus === "upcoming") {
+      await sessionService.updateSessionStatus(sessionId, "in_progress");
+      queryClient.invalidateQueries({ queryKey: ["mentor_sessions", user?.id] });
+    }
+    navigate(`/room/${sessionId}`);
   };
 
   const isSlotAvailable = (dayOfWeek: number, slotIndex: number) => {
@@ -148,7 +168,7 @@ const MentorDashboard = () => {
   };
 
   const pendingSessions = sessions?.filter((s) => s.status === "pending") || [];
-  const upcomingSessions = sessions?.filter((s) => s.status === "upcoming" && new Date(s.scheduled_at) >= new Date()) || [];
+  const upcomingSessions = sessions?.filter((s) => (s.status === "upcoming" || s.status === "in_progress") && new Date(s.scheduled_at) >= new Date(Date.now() - 3600000)) || [];
   const completedSessions = sessions?.filter((s) => s.status === "completed") || [];
 
   const totalEarnings = completedSessions.reduce((sum, session) => sum + (session.duration_minutes / 60) * hourlyRate, 0);
@@ -353,10 +373,10 @@ const MentorDashboard = () => {
                           size="sm"
                           variant="default"
                           className="gap-1 bg-primary text-primary-foreground hover:bg-primary/90"
-                          onClick={() => navigate(`/room/${session.id}`)}
+                          onClick={() => handleJoinSession(session.id, session.status)}
                         >
                           <Video className="h-4 w-4 shrink-0" />
-                          <span className="hidden sm:inline">Join</span>
+                          <span className="hidden sm:inline">{session.status === "in_progress" ? "Join" : "Start"}</span>
                         </Button>
                         <Button
                           size="sm"

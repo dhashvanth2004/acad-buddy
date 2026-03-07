@@ -27,7 +27,7 @@ const StudentDashboard = () => {
 
   const { data: sessions, isLoading: loadingSessions } = useQuery({
     queryKey: ["student_upcoming_sessions", user?.id],
-    queryFn: () => sessionService.getStudentSessions(user!.id, ["upcoming", "pending"]),
+    queryFn: () => sessionService.getStudentSessions(user!.id, ["upcoming", "pending", "in_progress"]),
     enabled: !!user?.id,
   });
 
@@ -63,6 +63,7 @@ const StudentDashboard = () => {
       case "upcoming": return "bg-primary/10 text-primary border-primary/20";
       case "completed": return "bg-success/10 text-success border-success/20";
       case "cancelled": return "bg-destructive/10 text-destructive border-destructive/20";
+      case "in_progress": return "bg-primary text-primary-foreground border-primary";
       default: return "bg-muted text-muted-foreground";
     }
   };
@@ -139,18 +140,21 @@ const StudentDashboard = () => {
                         )}
                       </div>
                       <div className="flex items-center gap-2">
-                        <Button
-                          size="sm"
-                          variant="default"
-                          className="gap-1 bg-primary text-primary-foreground hover:bg-primary/90"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            navigate(`/room/${session.id}`);
-                          }}
-                        >
-                          <Video className="h-4 w-4 shrink-0" />
-                          <span className="hidden sm:inline">Join</span>
-                        </Button>
+                        {session.status === "in_progress" && (
+                          <Button
+                            size="sm"
+                            variant="default"
+                            className="gap-1 bg-primary text-primary-foreground hover:bg-primary/90"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigate(`/room/${session.id}`);
+                            }}
+                            title="Join session"
+                          >
+                            <Video className="h-4 w-4 shrink-0" />
+                            <span className="hidden sm:inline">Join</span>
+                          </Button>
+                        )}
                         <Button
                           size="sm"
                           variant="ghost"
