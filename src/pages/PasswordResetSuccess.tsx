@@ -1,11 +1,20 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { GraduationCap, CheckCircle, ArrowRight } from "lucide-react";
+import { GraduationCap, CheckCircle, ArrowRight, Loader2 } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 
 const PasswordResetSuccess = () => {
   const navigate = useNavigate();
+  const { signOut } = useAuth();
+  const [loggingOut, setLoggingOut] = useState(false);
+
+  const handleGoToLogin = async () => {
+    setLoggingOut(true);
+    await signOut();
+    navigate("/login");
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 via-background to-accent/5 p-4">
@@ -43,13 +52,23 @@ const PasswordResetSuccess = () => {
               <p className="text-sm text-muted-foreground text-center">
                 Your account is now secure with your new password. Please keep it safe and don't share it with anyone.
               </p>
-              
+
               <Button
-                onClick={() => navigate("/")}
+                onClick={handleGoToLogin}
                 className="w-full gap-2"
+                disabled={loggingOut}
               >
-                Go to Login
-                <ArrowRight className="w-4 h-4" />
+                {loggingOut ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Redirecting...
+                  </>
+                ) : (
+                  <>
+                    Go to Login
+                    <ArrowRight className="w-4 h-4" />
+                  </>
+                )}
               </Button>
             </div>
           </CardContent>
