@@ -1,6 +1,7 @@
 import { useState, useEffect, createContext, useContext, ReactNode } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
 
 interface AuthContextType {
   user: User | null;
@@ -19,11 +20,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
+        if (event === 'PASSWORD_RECOVERY') {
+          navigate("/reset-password", { replace: true });
+        }
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
@@ -42,7 +47,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signUp = async (email: string, password: string, fullName: string, role: "student" | "mentor") => {
     const redirectUrl = `${window.location.origin}/`;
-    
+
     const { error } = await supabase.auth.signUp({
       email,
       password,
@@ -54,7 +59,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         },
       },
     });
-    
+
     return { error: error as Error | null };
   };
 
@@ -65,33 +70,35 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         email,
         password,
       });
-      
-      console.log('[AUTH] Sign in response:', { 
-        hasData: !!data, 
+
+      console.log('[AUTH] Sign in response:', {
+        hasData: !!data,
         hasUser: !!data?.user,
         hasSession: !!data?.session,
-        error: error?.message 
+        error: error?.message
       });
-      
+
       if (error) {
         console.error('[AUTH] Sign in error:', error);
       }
-      
+
       return { error: error as Error | null };
     } catch (err) {
       console.error('[AUTH] Sign in exception:', err);
-      return { 
+      return {
         error: new Error(
           err instanceof Error && err.message.includes('fetch')
             ? 'Network error: Unable to connect to authentication server. Please check your internet connection and try again.'
             : err instanceof Error ? err.message : 'An unexpected error occurred during sign in.'
-        ) 
+        )
       };
     }
   };
 
   const signOut = async () => {
     await supabase.auth.signOut();
+    setUser(null);
+    setSession(null);
   };
 
   const resetPassword = async (email: string) => {

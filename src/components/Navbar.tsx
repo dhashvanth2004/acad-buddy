@@ -70,7 +70,7 @@ const Navbar = () => {
       title: "Signed out",
       description: "You have been successfully signed out.",
     });
-    navigate("/");
+    navigate("/login");
   };
 
   return (

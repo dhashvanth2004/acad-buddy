@@ -22,7 +22,7 @@ const passwordConfirmSchema = z.object({
 const ResetPassword = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { updatePassword } = useAuth();
+  const { updatePassword, session, loading: authLoading } = useAuth();
   const { toast } = useToast();
 
   const [password, setPassword] = useState("");
@@ -32,49 +32,33 @@ const ResetPassword = () => {
   const [validating, setValidating] = useState(true);
   const [isValidToken, setIsValidToken] = useState(false);
 
-  // Validate token from URL on mount
+  // Validate session presence (Supabase sets session automatically from recovery URL)
   useEffect(() => {
-    const validateToken = async () => {
-      // Supabase sends recovery tokens in the URL hash fragment
-      const hash = window.location.hash;
-      
-      if (!hash || !hash.includes("access_token")) {
-        setIsValidToken(false);
-        setValidating(false);
-        return;
-      }
-
-      try {
-        // Check if we have a valid session from the recovery link
-        const { data: { session }, error } = await supabase.auth.getSession();
-        
-        if (error || !session) {
-          setIsValidToken(false);
-          setValidating(false);
-          toast({
-            variant: "destructive",
-            title: "Invalid Link",
-            description: "The password reset link is invalid or has expired.",
-          });
+    if (!authLoading) {
+      if (session) {
+        setIsValidToken(true);
+      } else {
+        // Also check hash just in case Supabase hasn't processed it yet
+        const hash = window.location.hash;
+        if (hash && hash.includes("access_token")) {
+          // Wait another second for supabase to parse it
+          setTimeout(() => {
+            supabase.auth.getSession().then(({ data }) => {
+              if (data.session) {
+                setIsValidToken(true);
+              } else {
+                setIsValidToken(false);
+              }
+              setValidating(false);
+            });
+          }, 1000);
           return;
         }
-
-        setIsValidToken(true);
-        setValidating(false);
-      } catch (error) {
-        console.error("Token validation error:", error);
         setIsValidToken(false);
-        setValidating(false);
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: "Failed to validate reset link.",
-        });
       }
-    };
-
-    validateToken();
-  }, [toast]);
+      setValidating(false);
+    }
+  }, [session, authLoading]);
 
   const validateForm = () => {
     const newErrors: { password?: string; confirmPassword?: string } = {};

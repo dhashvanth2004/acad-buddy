@@ -37,6 +37,11 @@ const Auth = ({ mode }: AuthProps) => {
   // Redirect if already logged in
   useEffect(() => {
     if (user && !authLoading) {
+      // Don't redirect if we are in the middle of a password reset flow
+      if (window.location.hash.includes("type=recovery")) {
+        return;
+      }
+
       console.log('[AUTH PAGE useEffect] User detected, redirecting...', { userId: user.id });
       // Fetch user role and redirect to appropriate dashboard
       const redirectUser = async () => {

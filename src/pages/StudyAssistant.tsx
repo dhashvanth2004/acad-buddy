@@ -33,33 +33,10 @@ const StudyAssistant = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [apiKey, setApiKey] = useState("");
-  const [showApiKeyDialog, setShowApiKeyDialog] = useState(false);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
-
-  // Load API key from local storage on mount
-  useEffect(() => {
-    const storedKey = localStorage.getItem("GEMINI_API_KEY");
-    if (storedKey) {
-      setApiKey(storedKey);
-    } else {
-      setShowApiKeyDialog(true);
-    }
-  }, []);
-
-  const saveApiKey = (key: string) => {
-    if (!key.trim()) return;
-    localStorage.setItem("GEMINI_API_KEY", key.trim());
-    setApiKey(key.trim());
-    setShowApiKeyDialog(false);
-    toast({
-      title: "API Key Saved",
-      description: "Your key has been saved securely to your browser.",
-    });
-  };
 
   // Fix auto-scroll on Radix's viewport element
   useEffect(() => {
@@ -118,40 +95,24 @@ const StudyAssistant = () => {
   }, [user, authLoading, navigate, toast]);
 
   const streamChat = async (userMessages: Message[]) => {
-    if (!apiKey) {
-      setShowApiKeyDialog(true);
-      throw new Error("Gemini API Key is required");
-    }
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) throw new Error("Authentication required");
 
-    const systemPrompt = `You are AcadBuddy's AI Study Assistant - a highly knowledgeable tutor. Your goal is to explain complex concepts simply, provide homework help, and offer study strategies. Format your responses using markdown. Keep explanations concise but thorough.`;
-
-    // Convert messages to Gemini's format
-    const geminiMessages = userMessages.map(msg => ({
-      role: msg.role === "assistant" ? "model" : "user",
-      parts: [{ text: msg.content }]
-    }));
-
-    const response = await fetch(`${GEMINI_API_URL}${apiKey}`, {
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || `https://${import.meta.env.VITE_SUPABASE_PROJECT_ID}.supabase.co`;
+    const response = await fetch(`${supabaseUrl}/functions/v1/study-assistant`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "Authorization": `Bearer ${session.access_token}`
       },
       body: JSON.stringify({
-        systemInstruction: {
-          parts: [{ text: systemPrompt }]
-        },
-        contents: geminiMessages,
+        messages: userMessages,
       }),
     });
 
     if (!response.ok) {
-      if (response.status === 400 || response.status === 403) {
-        localStorage.removeItem("GEMINI_API_KEY");
-        setApiKey("");
-        setShowApiKeyDialog(true);
-        throw new Error("Invalid API Key. Please provide a valid Gemini API Key.");
-      }
-      throw new Error(`Failed to communicate with AI (Status ${response.status})`);
+      const errorData = await response.json().catch(() => null);
+      throw new Error(errorData?.error || `Failed to communicate with AI (Status ${response.status})`);
     }
 
     if (!response.body) throw new Error("No response body");
@@ -171,16 +132,21 @@ const StudyAssistant = () => {
       // Keep the last partial line in the buffer
       textBuffer = lines.pop() || "";
 
+      let isDone = false;
       for (const line of lines) {
         if (line.startsWith("data: ")) {
           const contentStr = line.replace("data: ", "").trim();
           if (!contentStr) continue;
+          if (contentStr === "[DONE]") {
+            isDone = true;
+            break;
+          }
 
           try {
             const data = JSON.parse(contentStr);
-            const textChunk = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+            if (data?.choices && data.choices[0]?.delta?.content) {
+              const textChunk = data.choices[0].delta.content;
 
-            if (textChunk) {
               assistantContent += textChunk;
               setMessages((prev) => {
                 const last = prev[prev.length - 1];
@@ -198,14 +164,11 @@ const StudyAssistant = () => {
           }
         }
       }
+      if (isDone) break;
     }
   };
 
   const handleSend = async (messageText?: string) => {
-    if (!apiKey) {
-      setShowApiKeyDialog(true);
-      return;
-    }
 
     const text = messageText || input.trim();
     if (!text || isLoading) return;
@@ -257,49 +220,7 @@ const StudyAssistant = () => {
 
         <Card className="flex flex-col h-[calc(100vh-14rem)] md:h-[calc(100vh-16rem)] border-border bg-card shadow-sm overflow-hidden animate-fade-in relative z-10 w-full relative">
 
-          {/* API Key Modal Overlay */}
-          {showApiKeyDialog && (
-            <div className="absolute inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-center justify-center p-4">
-              <Card className="w-full max-w-md shadow-lg border-border">
-                <div className="p-6">
-                  <div className="flex items-center gap-3 mb-4 text-primary">
-                    <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20">
-                      <Key className="w-5 h-5" />
-                    </div>
-                    <h2 className="text-xl font-bold tracking-tight text-foreground">API Setup Required</h2>
-                  </div>
-                  <p className="text-sm text-muted-foreground mb-6">
-                    To use the Study Assistant, you need a free Google Gemini API Key. Your key is securely stored in your browser's local storage and is never sent to our servers.
-                  </p>
-                  <form onSubmit={(e) => {
-                    e.preventDefault();
-                    const fd = new FormData(e.currentTarget);
-                    saveApiKey(fd.get("apiKey") as string);
-                  }} className="space-y-4">
-                    <Input
-                      name="apiKey"
-                      placeholder="AIzaSy..."
-                      className="bg-background/50 border-primary/20 focus-visible:border-primary"
-                      autoFocus
-                    />
-                    <div className="flex flex-col gap-2">
-                      <Button type="submit" className="w-full">
-                        Save Key & Start Learning
-                      </Button>
-                      <a
-                        href="https://aistudio.google.com/app/apikey"
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-xs text-center text-muted-foreground hover:text-primary transition-colors flex items-center justify-center gap-1 mt-2"
-                      >
-                        <AlertCircle className="w-3 h-3" /> Get a free Gemini API Key here
-                      </a>
-                    </div>
-                  </form>
-                </div>
-              </Card>
-            </div>
-          )}
+
 
           <ScrollArea className="flex-1 p-6" ref={scrollAreaRef}>
             {messages.length === 0 ? (
