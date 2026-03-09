@@ -115,14 +115,50 @@ const MentorDashboard = () => {
   const handleSessionAction = async (sessionId: string, newStatus: "upcoming" | "cancelled") => {
     updateSessionMutation.mutate({ id: sessionId, status: newStatus });
 
-    // Trigger email notification to student
+    // Send email notification to student via EmailJS
     try {
-      await supabase.functions.invoke('session-notifications', {
-        body: {
-          type: newStatus === 'upcoming' ? 'booking_accepted' : 'booking_declined',
-          sessionId: sessionId
+      const { data: sessionData } = await supabase
+        .from("sessions")
+        .select("scheduled_at, duration_minutes, subject, student_id")
+        .eq("id", sessionId)
+        .maybeSingle();
+
+      if (sessionData) {
+        const { data: studentProfile } = await supabase
+          .from("profiles")
+          .select("email, full_name")
+          .eq("user_id", sessionData.student_id)
+          .maybeSingle();
+
+        const { data: mentorProfile } = await supabase
+          .from("profiles")
+          .select("full_name")
+          .eq("user_id", user!.id)
+          .maybeSingle();
+
+        if (studentProfile?.email) {
+          if (newStatus === "upcoming") {
+            const { sendBookingAcceptedEmail } = await import("@/services/email.service");
+            await sendBookingAcceptedEmail({
+              studentEmail: studentProfile.email,
+              studentName: studentProfile.full_name || "Student",
+              mentorName: mentorProfile?.full_name || "Your mentor",
+              date: new Date(sessionData.scheduled_at).toLocaleString(),
+              duration: sessionData.duration_minutes + " minutes",
+              subject: sessionData.subject || undefined,
+            });
+          } else {
+            const { sendBookingDeclinedEmail } = await import("@/services/email.service");
+            await sendBookingDeclinedEmail({
+              studentEmail: studentProfile.email,
+              studentName: studentProfile.full_name || "Student",
+              mentorName: mentorProfile?.full_name || "Your mentor",
+              date: new Date(sessionData.scheduled_at).toLocaleString(),
+              subject: sessionData.subject || undefined,
+            });
+          }
         }
-      });
+      }
     } catch (e) {
       console.error("Failed to notify student", e);
     }
