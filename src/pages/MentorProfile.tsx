@@ -344,11 +344,32 @@ const MentorProfile = () => {
 
       if (error) throw error;
 
-      // Trigger email notification to mentor
+      // Send email notification to mentor via EmailJS
       try {
-        await supabase.functions.invoke('session-notifications', {
-          body: { type: 'booking_request', sessionId: session.id }
-        });
+        const { data: mentorProfile } = await supabase
+          .from("profiles")
+          .select("email, full_name")
+          .eq("user_id", mentor?.user_id)
+          .maybeSingle();
+
+        const { data: studentProfile } = await supabase
+          .from("profiles")
+          .select("full_name")
+          .eq("user_id", user.id)
+          .maybeSingle();
+
+        if (mentorProfile?.email) {
+          const { sendBookingRequestEmail } = await import("@/services/email.service");
+          await sendBookingRequestEmail({
+            mentorEmail: mentorProfile.email,
+            mentorName: mentorProfile.full_name || "Mentor",
+            studentName: studentProfile?.full_name || "A student",
+            date: scheduledAt.toLocaleString(),
+            duration: bookingDuration + " minutes",
+            subject: bookingSubject || undefined,
+            notes: bookingNotes || undefined,
+          });
+        }
       } catch (e) {
         console.error("Failed to notify mentor:", e);
       }

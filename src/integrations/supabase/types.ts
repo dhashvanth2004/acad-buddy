@@ -164,6 +164,7 @@ export type Database = {
           bio: string | null
           created_at: string
           department: string | null
+          email: string | null
           full_name: string | null
           hourly_rate: number | null
           id: string
@@ -179,6 +180,7 @@ export type Database = {
           bio?: string | null
           created_at?: string
           department?: string | null
+          email?: string | null
           full_name?: string | null
           hourly_rate?: number | null
           id?: string
@@ -194,6 +196,7 @@ export type Database = {
           bio?: string | null
           created_at?: string
           department?: string | null
+          email?: string | null
           full_name?: string | null
           hourly_rate?: number | null
           id?: string
@@ -304,7 +307,7 @@ export type Database = {
       reject_mentor_application: { Args: { app_id: string }; Returns: boolean }
     }
     Enums: {
-      user_role: "student" | "mentor"
+      user_role: "student" | "mentor" | "admin"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -432,7 +435,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      user_role: ["student", "mentor"],
+      user_role: ["student", "mentor", "admin"],
     },
   },
 } as const
