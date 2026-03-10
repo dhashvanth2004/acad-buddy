@@ -62,13 +62,15 @@ export const sendBookingAcceptedEmail = (params: {
   duration: string;
   subject?: string;
 }) =>
-  sendEmail(TEMPLATE_IDS.booking_accepted, {
+  sendEmail(TEMPLATE_IDS.booking_response, {
     to_email: params.studentEmail,
     to_name: params.studentName,
     from_name: params.mentorName,
     subject: params.subject || "General tutoring",
     date: params.date,
     duration: params.duration,
+    status: "accepted",
+    message: `Great news! ${params.mentorName} has accepted your tutoring session.`,
   });
 
 export const sendBookingDeclinedEmail = (params: {
@@ -78,10 +80,12 @@ export const sendBookingDeclinedEmail = (params: {
   date: string;
   subject?: string;
 }) =>
-  sendEmail(TEMPLATE_IDS.booking_declined, {
+  sendEmail(TEMPLATE_IDS.booking_response, {
     to_email: params.studentEmail,
     to_name: params.studentName,
     from_name: params.mentorName,
     subject: params.subject || "General tutoring",
     date: params.date,
+    status: "declined",
+    message: `Unfortunately, ${params.mentorName} was unable to accept your tutoring session.`,
   });

@@ -28,7 +28,7 @@ const EditProfile = () => {
   const [hourlyRate, setHourlyRate] = useState("");
   const [subjects, setSubjects] = useState<string[]>([]);
   const [newSubject, setNewSubject] = useState("");
-  const [role, setRole] = useState<"student" | "mentor">("student");
+  const [role, setRole] = useState<"student" | "mentor" | "admin">("student");
   const [saving, setSaving] = useState(false);
   const [loadingProfile, setLoadingProfile] = useState(true);
 
