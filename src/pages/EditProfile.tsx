@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
@@ -18,6 +19,7 @@ import { Save, X, Plus, ArrowLeft } from "lucide-react";
 const EditProfile = () => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { toast } = useToast();
 
   const [fullName, setFullName] = useState("");
@@ -100,6 +102,7 @@ const EditProfile = () => {
 
       if (error) throw error;
 
+      queryClient.invalidateQueries({ queryKey: ["mentors"] });
       toast({ title: "Profile updated", description: "Your changes have been saved." });
       navigate(role === "mentor" ? "/mentor-dashboard" : "/dashboard");
     } catch (error) {
