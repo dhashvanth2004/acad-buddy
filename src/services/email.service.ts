@@ -18,6 +18,8 @@ interface EmailParams {
   date?: string;
   duration?: string;
   notes?: string;
+  status?: string;
+  message?: string;
 }
 
 const sendEmail = async (templateId: string, params: EmailParams): Promise<void> => {
