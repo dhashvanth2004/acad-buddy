@@ -102,6 +102,7 @@ const EditProfile = () => {
 
       if (error) throw error;
 
+      queryClient.invalidateQueries({ queryKey: ["mentors"] });
       toast({ title: "Profile updated", description: "Your changes have been saved." });
       navigate(role === "mentor" ? "/mentor-dashboard" : "/dashboard");
     } catch (error) {
