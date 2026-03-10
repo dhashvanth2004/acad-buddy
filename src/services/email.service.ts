@@ -24,8 +24,8 @@ interface EmailParams {
 
 const sendEmail = async (templateId: string, params: EmailParams): Promise<void> => {
   try {
-    if (EMAILJS_SERVICE_ID === "YOUR_SERVICE_ID") {
-      console.warn("EmailJS not configured — skipping email notification. Update EMAILJS_SERVICE_ID, EMAILJS_PUBLIC_KEY, and template IDs in src/services/email.service.ts");
+    if (!EMAILJS_SERVICE_ID || !EMAILJS_PUBLIC_KEY) {
+      console.warn("EmailJS not configured — skipping email notification.");
       return;
     }
     await emailjs.send(EMAILJS_SERVICE_ID, templateId, params as unknown as Record<string, unknown>, EMAILJS_PUBLIC_KEY);
