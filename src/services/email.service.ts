@@ -2,8 +2,8 @@ import emailjs from "@emailjs/browser";
 
 // EmailJS public configuration — these are safe to store in code
 // Users must replace these with their own EmailJS credentials
-const EMAILJS_SERVICE_ID = "YOUR_SERVICE_ID";
-const EMAILJS_PUBLIC_KEY = "YOUR_PUBLIC_KEY";
+const EMAILJS_SERVICE_ID = "service_sff9rse";
+const EMAILJS_PUBLIC_KEY = "b65ip9E4hAfkFaHsq";
 
 const TEMPLATE_IDS = {
   booking_request: "booking_request",
