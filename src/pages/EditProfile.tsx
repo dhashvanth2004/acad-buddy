@@ -19,6 +19,7 @@ import { Save, X, Plus, ArrowLeft } from "lucide-react";
 const EditProfile = () => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { toast } = useToast();
 
   const [fullName, setFullName] = useState("");
