@@ -7,8 +7,7 @@ const EMAILJS_PUBLIC_KEY = "YOUR_PUBLIC_KEY";
 
 const TEMPLATE_IDS = {
   booking_request: "booking_request",
-  booking_accepted: "booking_accepted",
-  booking_declined: "booking_declined",
+  booking_response: "booking_response",
 };
 
 interface EmailParams {
