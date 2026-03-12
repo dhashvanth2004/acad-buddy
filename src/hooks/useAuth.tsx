@@ -48,7 +48,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signUp = async (email: string, password: string, fullName: string, role: "student" | "mentor") => {
     // Use the published app URL for email redirect, falling back to current origin
-    const redirectUrl = "https://getacadbuddy.lovable.app/";
+    const redirectUrl = "https://getacadbuddy.lovable.app/email-confirmed";
 
     const { error } = await supabase.auth.signUp({
       email,
