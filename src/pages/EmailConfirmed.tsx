@@ -1,9 +1,19 @@
+import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, GraduationCap } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 const EmailConfirmed = () => {
+  useEffect(() => {
+    // Clear session so the user is forced to log in manually when they go to the login page
+    const clearSession = async () => {
+      await supabase.auth.signOut();
+    };
+    clearSession();
+  }, []);
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-4">
       <Card className="w-full max-w-md text-center">
