@@ -205,10 +205,8 @@ const Auth = ({ mode }: AuthProps) => {
             });
           }
         } else {
-          toast({
-            title: "Account created!",
-            description: "Please check your email to verify your account before logging in.",
-          });
+          setVerificationEmail(email);
+          setShowVerification(true);
         }
       }
     } finally {
