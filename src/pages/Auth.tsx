@@ -222,6 +222,66 @@ const Auth = ({ mode }: AuthProps) => {
     );
   }
 
+  if (showVerification) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background p-8">
+        <div className="w-full max-w-md text-center space-y-6 animate-fade-in">
+          <Link to="/" className="flex items-center justify-center gap-2 mb-6 group">
+            <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center border border-primary/20">
+              <GraduationCap className="w-7 h-7 text-primary" />
+            </div>
+            <span className="text-2xl font-bold text-foreground tracking-tight">
+              Acad<span className="text-primary">Buddy</span>
+            </span>
+          </Link>
+
+          <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto">
+            <Mail className="w-10 h-10 text-primary" />
+          </div>
+
+          <div className="space-y-2">
+            <h1 className="text-2xl font-semibold tracking-tight text-foreground">Check your email</h1>
+            <p className="text-muted-foreground">
+              We've sent a verification link to{" "}
+              <span className="font-medium text-foreground">{verificationEmail}</span>.
+              Please click the link to verify your account.
+            </p>
+          </div>
+
+          <div className="bg-muted/50 rounded-lg p-4 text-sm text-muted-foreground space-y-1">
+            <p>Didn't receive the email? Check your spam folder or click below to resend.</p>
+          </div>
+
+          <Button
+            onClick={handleResendVerification}
+            disabled={resendLoading || resendCooldown > 0}
+            variant="outline"
+            className="w-full"
+          >
+            {resendLoading ? (
+              <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Sending...</>
+            ) : resendCooldown > 0 ? (
+              `Resend in ${resendCooldown}s`
+            ) : (
+              "Resend verification email"
+            )}
+          </Button>
+
+          <Button
+            variant="ghost"
+            className="w-full"
+            onClick={() => {
+              setShowVerification(false);
+              setVerificationEmail("");
+            }}
+          >
+            Back to {mode === "signup" ? "sign up" : "log in"}
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex w-full bg-background">
       {/* Left Side: Form */}
