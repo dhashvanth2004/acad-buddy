@@ -134,7 +134,15 @@ const Auth = ({ mode }: AuthProps) => {
 
         if (error) {
           console.error('[AUTH PAGE] Login error:', error.message);
-          if (error.message.includes("Invalid login credentials")) {
+          if (error.message.includes("Email not confirmed")) {
+            setVerificationEmail(email);
+            setShowVerification(true);
+            toast({
+              variant: "destructive",
+              title: "Email not verified",
+              description: "Please verify your email before logging in.",
+            });
+          } else if (error.message.includes("Invalid login credentials")) {
             toast({
               variant: "destructive",
               title: "Login failed",
