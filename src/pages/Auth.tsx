@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { GraduationCap, BookOpen, Users, Loader2 } from "lucide-react";
+import { GraduationCap, BookOpen, Users, Loader2, Mail, CheckCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
@@ -23,7 +23,7 @@ interface AuthProps {
 
 const Auth = ({ mode }: AuthProps) => {
   const navigate = useNavigate();
-  const { user, loading: authLoading, signIn, signUp } = useAuth();
+  const { user, loading: authLoading, signIn, signUp, resendVerification } = useAuth();
   const { toast } = useToast();
 
   const [email, setEmail] = useState("");
@@ -33,6 +33,10 @@ const Auth = ({ mode }: AuthProps) => {
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [errors, setErrors] = useState<{ email?: string; password?: string; fullName?: string }>({});
+  const [showVerification, setShowVerification] = useState(false);
+  const [verificationEmail, setVerificationEmail] = useState("");
+  const [resendLoading, setResendLoading] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
 
   // Redirect if already logged in
   useEffect(() => {
@@ -67,6 +71,29 @@ const Auth = ({ mode }: AuthProps) => {
       redirectUser();
     }
   }, [user, authLoading, navigate]);
+
+  // Resend cooldown timer
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const timer = setTimeout(() => setResendCooldown(resendCooldown - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [resendCooldown]);
+
+  const handleResendVerification = async () => {
+    if (resendCooldown > 0 || resendLoading) return;
+    setResendLoading(true);
+    try {
+      const { error } = await resendVerification(verificationEmail);
+      if (error) {
+        toast({ variant: "destructive", title: "Failed to resend", description: error.message });
+      } else {
+        toast({ title: "Email sent!", description: "A new verification email has been sent." });
+        setResendCooldown(60);
+      }
+    } finally {
+      setResendLoading(false);
+    }
+  };
 
   const validateForm = () => {
     const newErrors: { email?: string; password?: string; fullName?: string } = {};
@@ -107,7 +134,15 @@ const Auth = ({ mode }: AuthProps) => {
 
         if (error) {
           console.error('[AUTH PAGE] Login error:', error.message);
-          if (error.message.includes("Invalid login credentials")) {
+          if (error.message.includes("Email not confirmed")) {
+            setVerificationEmail(email);
+            setShowVerification(true);
+            toast({
+              variant: "destructive",
+              title: "Email not verified",
+              description: "Please verify your email before logging in.",
+            });
+          } else if (error.message.includes("Invalid login credentials")) {
             toast({
               variant: "destructive",
               title: "Login failed",
@@ -170,10 +205,8 @@ const Auth = ({ mode }: AuthProps) => {
             });
           }
         } else {
-          toast({
-            title: "Account created!",
-            description: "Please check your email to verify your account before logging in.",
-          });
+          setVerificationEmail(email);
+          setShowVerification(true);
         }
       }
     } finally {
@@ -185,6 +218,66 @@ const Auth = ({ mode }: AuthProps) => {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (showVerification) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background p-8">
+        <div className="w-full max-w-md text-center space-y-6 animate-fade-in">
+          <Link to="/" className="flex items-center justify-center gap-2 mb-6 group">
+            <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center border border-primary/20">
+              <GraduationCap className="w-7 h-7 text-primary" />
+            </div>
+            <span className="text-2xl font-bold text-foreground tracking-tight">
+              Acad<span className="text-primary">Buddy</span>
+            </span>
+          </Link>
+
+          <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto">
+            <Mail className="w-10 h-10 text-primary" />
+          </div>
+
+          <div className="space-y-2">
+            <h1 className="text-2xl font-semibold tracking-tight text-foreground">Check your email</h1>
+            <p className="text-muted-foreground">
+              We've sent a verification link to{" "}
+              <span className="font-medium text-foreground">{verificationEmail}</span>.
+              Please click the link to verify your account.
+            </p>
+          </div>
+
+          <div className="bg-muted/50 rounded-lg p-4 text-sm text-muted-foreground space-y-1">
+            <p>Didn't receive the email? Check your spam folder or click below to resend.</p>
+          </div>
+
+          <Button
+            onClick={handleResendVerification}
+            disabled={resendLoading || resendCooldown > 0}
+            variant="outline"
+            className="w-full"
+          >
+            {resendLoading ? (
+              <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Sending...</>
+            ) : resendCooldown > 0 ? (
+              `Resend in ${resendCooldown}s`
+            ) : (
+              "Resend verification email"
+            )}
+          </Button>
+
+          <Button
+            variant="ghost"
+            className="w-full"
+            onClick={() => {
+              setShowVerification(false);
+              setVerificationEmail("");
+            }}
+          >
+            Back to {mode === "signup" ? "sign up" : "log in"}
+          </Button>
+        </div>
       </div>
     );
   }
