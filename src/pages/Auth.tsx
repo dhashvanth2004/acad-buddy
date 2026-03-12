@@ -72,6 +72,29 @@ const Auth = ({ mode }: AuthProps) => {
     }
   }, [user, authLoading, navigate]);
 
+  // Resend cooldown timer
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const timer = setTimeout(() => setResendCooldown(resendCooldown - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [resendCooldown]);
+
+  const handleResendVerification = async () => {
+    if (resendCooldown > 0 || resendLoading) return;
+    setResendLoading(true);
+    try {
+      const { error } = await resendVerification(verificationEmail);
+      if (error) {
+        toast({ variant: "destructive", title: "Failed to resend", description: error.message });
+      } else {
+        toast({ title: "Email sent!", description: "A new verification email has been sent." });
+        setResendCooldown(60);
+      }
+    } finally {
+      setResendLoading(false);
+    }
+  };
+
   const validateForm = () => {
     const newErrors: { email?: string; password?: string; fullName?: string } = {};
 
