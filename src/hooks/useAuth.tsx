@@ -47,7 +47,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const signUp = async (email: string, password: string, fullName: string, role: "student" | "mentor") => {
-    const redirectUrl = `${window.location.origin}/`;
+    // Use published URL for email verification redirect to avoid redirecting to Lovable editor
+    const siteUrl = import.meta.env.VITE_SITE_URL || window.location.origin;
+    const redirectUrl = `${siteUrl}/`;
 
     const { error } = await supabase.auth.signUp({
       email,
