@@ -25,6 +25,7 @@ const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const PasswordResetSuccess = lazy(() => import("./pages/PasswordResetSuccess"));
 const ComingSoon = lazy(() => import("./pages/ComingSoon"));
 const VideoRoom = lazy(() => import("./pages/VideoRoom"));
+const EmailConfirmed = lazy(() => import("./pages/EmailConfirmed"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient({
