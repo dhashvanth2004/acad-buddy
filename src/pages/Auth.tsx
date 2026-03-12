@@ -23,7 +23,7 @@ interface AuthProps {
 
 const Auth = ({ mode }: AuthProps) => {
   const navigate = useNavigate();
-  const { user, loading: authLoading, signIn, signUp } = useAuth();
+  const { user, loading: authLoading, signIn, signUp, resendVerification } = useAuth();
   const { toast } = useToast();
 
   const [email, setEmail] = useState("");
@@ -33,6 +33,10 @@ const Auth = ({ mode }: AuthProps) => {
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [errors, setErrors] = useState<{ email?: string; password?: string; fullName?: string }>({});
+  const [showVerification, setShowVerification] = useState(false);
+  const [verificationEmail, setVerificationEmail] = useState("");
+  const [resendLoading, setResendLoading] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
 
   // Redirect if already logged in
   useEffect(() => {
