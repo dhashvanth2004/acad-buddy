@@ -25,6 +25,7 @@ const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const PasswordResetSuccess = lazy(() => import("./pages/PasswordResetSuccess"));
 const ComingSoon = lazy(() => import("./pages/ComingSoon"));
 const VideoRoom = lazy(() => import("./pages/VideoRoom"));
+const EmailConfirmed = lazy(() => import("./pages/EmailConfirmed"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient({
@@ -63,6 +64,7 @@ const App = () => (
               <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/password-reset-success" element={<PasswordResetSuccess />} />
+              <Route path="/email-confirmed" element={<EmailConfirmed />} />
 
               <Route path="/become-mentor" element={<ProtectedRoute><BecomeMentor /></ProtectedRoute>} />
               <Route path="/dashboard" element={<ProtectedRoute><StudentDashboard /></ProtectedRoute>} />
