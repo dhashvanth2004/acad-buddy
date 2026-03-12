@@ -47,7 +47,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const signUp = async (email: string, password: string, fullName: string, role: "student" | "mentor") => {
-    const redirectUrl = `${window.location.origin}/`;
+    // Use the published app URL for email redirect, falling back to current origin
+    const redirectUrl = "https://getacadbuddy.lovable.app/";
 
     const { error } = await supabase.auth.signUp({
       email,
@@ -103,7 +104,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const resetPassword = async (email: string) => {
-    const redirectUrl = `${window.location.origin}/reset-password`;
+    const redirectUrl = "https://getacadbuddy.lovable.app/reset-password";
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: redirectUrl,
     });
