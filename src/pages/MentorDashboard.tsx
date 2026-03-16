@@ -10,8 +10,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import {
   Calendar,
@@ -26,13 +24,6 @@ import {
   Video,
 } from "lucide-react";
 import { format } from "date-fns";
-
-const DAYS_OF_WEEK = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-const DEFAULT_SLOTS = [
-  { start: "09:00", end: "12:00" },
-  { start: "14:00", end: "17:00" },
-  { start: "18:00", end: "21:00" },
-];
 
 const MentorDashboard = () => {
   const { user } = useAuth();
@@ -72,19 +63,28 @@ const MentorDashboard = () => {
     enabled: !!user?.id && isMentor,
   });
 
-  const { data: availability, isLoading: loadingAvailability } = useQuery({
-    queryKey: ["mentor_availability", user?.id],
-    queryFn: () => sessionService.getMentorAvailability(user!.id),
-    enabled: !!user?.id && isMentor,
-  });
-
   const updateSessionMutation = useMutation({
     mutationFn: ({ id, status }: { id: string, status: string }) => sessionService.updateSessionStatus(id, status),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["mentor_sessions", user?.id] });
+      
+      let title = "Session Updated";
+      let description = "The session status has been updated.";
+      
+      if (variables.status === "upcoming") {
+        title = "Session Accepted";
+        description = "The session has been accepted.";
+      } else if (variables.status === "cancelled") {
+        title = "Session Declined";
+        description = "The session has been declined.";
+      } else if (variables.status === "completed") {
+        title = "Session Completed";
+        description = "The session has been successfully marked as completed.";
+      }
+
       toast({
-        title: variables.status === "upcoming" ? "Session Accepted" : "Session Declined",
-        description: `The session has been ${variables.status === "upcoming" ? "accepted" : "declined"}.`,
+        title,
+        description,
       });
     },
     onError: () => {
@@ -96,23 +96,7 @@ const MentorDashboard = () => {
     }
   });
 
-  const toggleAvailabilityMutation = useMutation({
-    mutationFn: (vars: { dayOfWeek: number, slot: { start: string, end: string }, existingSlot: any }) => {
-      return sessionService.toggleAvailability(user!.id, vars.dayOfWeek, vars.slot.start, vars.slot.end, vars.existingSlot?.id, vars.existingSlot?.is_available);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["mentor_availability", user?.id] });
-    },
-    onError: () => {
-      toast({
-        title: "Error",
-        description: "Failed to update availability.",
-        variant: "destructive",
-      });
-    }
-  });
-
-  const handleSessionAction = async (sessionId: string, newStatus: "upcoming" | "cancelled") => {
+  const handleSessionAction = async (sessionId: string, newStatus: "upcoming" | "cancelled" | "completed") => {
     updateSessionMutation.mutate({ id: sessionId, status: newStatus });
 
     // Send email notification to student via EmailJS
@@ -170,22 +154,6 @@ const MentorDashboard = () => {
       queryClient.invalidateQueries({ queryKey: ["mentor_sessions", user?.id] });
     }
     navigate(`/room/${sessionId}`);
-  };
-
-  const isSlotAvailable = (dayOfWeek: number, slotIndex: number) => {
-    const slot = DEFAULT_SLOTS[slotIndex];
-    const existingSlot = availability?.find(
-      (a) => a.day_of_week === dayOfWeek && a.start_time === slot.start + ":00" && a.end_time === slot.end + ":00"
-    );
-    return existingSlot?.is_available ?? false;
-  };
-
-  const toggleAvailability = (dayOfWeek: number, slotIndex: number) => {
-    const slot = DEFAULT_SLOTS[slotIndex];
-    const existingSlot = availability?.find(
-      (a) => a.day_of_week === dayOfWeek && a.start_time === slot.start + ":00" && a.end_time === slot.end + ":00"
-    );
-    toggleAvailabilityMutation.mutate({ dayOfWeek, slot, existingSlot });
   };
 
   const getInitials = (name: string | null) => {
@@ -404,25 +372,37 @@ const MentorDashboard = () => {
                           </div>
                         )}
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Button
-                          size="sm"
-                          variant="default"
-                          className="gap-1 bg-primary text-primary-foreground hover:bg-primary/90"
-                          onClick={() => handleJoinSession(session.id, session.status)}
-                        >
-                          <Video className="h-4 w-4 shrink-0" />
-                          <span className="hidden sm:inline">{session.status === "in_progress" ? "Join" : "Start"}</span>
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          className="gap-1"
-                          onClick={() => navigate(`/chat?with=${session.student_id}`)}
-                        >
-                          <MessageSquare className="h-4 w-4" />
-                        </Button>
+                      <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2">
                         <Badge className={getStatusColor(session.status)}>{session.status}</Badge>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            size="sm"
+                            variant="default"
+                            className="gap-1 bg-primary text-primary-foreground hover:bg-primary/90"
+                            onClick={() => handleJoinSession(session.id, session.status)}
+                          >
+                            <Video className="h-4 w-4 shrink-0" />
+                            <span className="hidden sm:inline">{session.status === "in_progress" ? "Join" : "Start"}</span>
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="default"
+                            className="gap-1 bg-success text-success-foreground hover:bg-success/90"
+                            onClick={() => handleSessionAction(session.id, "completed" as any)}
+                            disabled={updateSessionMutation.isPending}
+                          >
+                            <CheckCircle className="h-4 w-4 shrink-0" />
+                            <span className="hidden sm:inline">Mark as Completed</span>
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="gap-1"
+                            onClick={() => navigate(`/chat?with=${session.student_id}`)}
+                          >
+                            <MessageSquare className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -432,61 +412,7 @@ const MentorDashboard = () => {
           </Card>
         </div>
 
-        {/* Availability Management */}
-        <Card className="mt-8 shadow-card">
-          <CardHeader className="flex flex-row items-center gap-3">
-            <div className="p-2 rounded-lg bg-success/10">
-              <TrendingUp className="h-5 w-5 text-success" />
-            </div>
-            <div>
-              <CardTitle className="text-xl">Manage Availability</CardTitle>
-              <p className="text-sm text-muted-foreground mt-1">Toggle time slots when you're available for sessions</p>
-            </div>
-          </CardHeader>
-          <CardContent>
-            {loadingAvailability ? (
-              <div className="h-48 flex items-center justify-center">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full min-w-[640px]">
-                  <thead>
-                    <tr>
-                      <th className="text-left p-2 text-sm font-medium text-muted-foreground">Day</th>
-                      {DEFAULT_SLOTS.map((slot, i) => (
-                        <th key={i} className="text-center p-2 text-sm font-medium text-muted-foreground">
-                          {slot.start} - {slot.end}
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {DAYS_OF_WEEK.map((day, dayIndex) => (
-                      <tr key={day} className="border-t border-border">
-                        <td className="p-3 font-medium text-foreground">{day}</td>
-                        {DEFAULT_SLOTS.map((_, slotIndex) => (
-                          <td key={slotIndex} className="p-3 text-center">
-                            <div className="flex items-center justify-center gap-2">
-                              <Switch
-                                id={`${dayIndex}-${slotIndex}`}
-                                checked={isSlotAvailable(dayIndex, slotIndex)}
-                                onCheckedChange={() => toggleAvailability(dayIndex, slotIndex)}
-                              />
-                              <Label htmlFor={`${dayIndex}-${slotIndex}`} className="text-xs text-muted-foreground sr-only">
-                                {isSlotAvailable(dayIndex, slotIndex) ? "Available" : "Unavailable"}
-                              </Label>
-                            </div>
-                          </td>
-                        ))}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+
 
         {/* Hourly Rate Info */}
         <Card className="mt-8 shadow-card">

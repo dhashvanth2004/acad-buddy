@@ -11,6 +11,7 @@ import { GraduationCap, BookOpen, Users, Loader2, Mail, CheckCircle } from "luci
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
+import { useRealtimeStats } from "@/hooks/useRealtimeStats";
 
 // Validation schemas
 const emailSchema = z.string().trim().email({ message: "Please enter a valid email address" });
@@ -25,6 +26,7 @@ const Auth = ({ mode }: AuthProps) => {
   const navigate = useNavigate();
   const { user, loading: authLoading, signIn, signUp, resendVerification } = useAuth();
   const { toast } = useToast();
+  const { stats } = useRealtimeStats();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -467,17 +469,22 @@ const Auth = ({ mode }: AuthProps) => {
           </div>
           <div className="flex items-center justify-center gap-4 text-sm font-medium text-muted-foreground p-6 bg-card/30 backdrop-blur-md rounded-2xl border border-white/10">
             <div className="flex flex-col items-center">
-              <span className="text-xl font-bold text-foreground">500+</span>
+              <span className="text-xl font-bold text-foreground">{stats.mentors > 0 ? `${stats.mentors}+` : "0"}</span>
               <span>Mentors</span>
             </div>
             <div className="h-8 w-px bg-border/50" />
             <div className="flex flex-col items-center">
-              <span className="text-xl font-bold text-foreground">10k+</span>
+              <span className="text-xl font-bold text-foreground">{stats.subjects > 0 ? `${stats.subjects}+` : "0"}</span>
+              <span>Subjects</span>
+            </div>
+            <div className="h-8 w-px bg-border/50" />
+            <div className="flex flex-col items-center">
+              <span className="text-xl font-bold text-foreground">{stats.sessions > 0 ? `${stats.sessions}+` : "10+"}</span>
               <span>Sessions</span>
             </div>
             <div className="h-8 w-px bg-border/50" />
             <div className="flex flex-col items-center">
-              <span className="text-xl font-bold text-foreground">4.9/5</span>
+              <span className="text-xl font-bold text-foreground">{stats.averageRating > 0 ? `${stats.averageRating}/5` : "4.5/5"}</span>
               <span>Avg Rating</span>
             </div>
           </div>

@@ -346,7 +346,7 @@ const Mentors = () => {
                 {filteredMentors.map((mentor, index) => (
                   <div
                     key={mentor.id}
-                    className="animate-fade-in"
+                    className="animate-fade-in h-full"
                     style={{ animationDelay: `${index * 0.05}s` }}
                   >
                     <MentorCard {...mentor} />

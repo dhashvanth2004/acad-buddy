@@ -83,7 +83,7 @@ const MentorsShowcase = () => {
           {mentors.map((mentor, index) => (
             <div
               key={mentor.id}
-              className="animate-slide-up"
+              className="animate-slide-up h-full"
               style={{ animationDelay: `${index * 0.1}s` }}
             >
               <MentorCard {...mentor} />

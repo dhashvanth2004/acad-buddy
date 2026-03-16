@@ -6,11 +6,12 @@ import { useAuth } from "@/hooks/useAuth";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { logger } from "@/lib/error-logger";
+import { useRealtimeStats } from "@/hooks/useRealtimeStats";
 
 const HeroSection = () => {
   const { user } = useAuth();
   const [isMentor, setIsMentor] = useState(false);
-  const [activeMentorCount, setActiveMentorCount] = useState(0);
+  const { stats } = useRealtimeStats();
 
   useEffect(() => {
     if (!user) return;
@@ -18,32 +19,6 @@ const HeroSection = () => {
       .then(({ data }) => { if (data?.role === "mentor") setIsMentor(true); });
   }, [user]);
 
-  useEffect(() => {
-    const fetchActiveMentors = async () => {
-      try {
-        const { data, error } = await supabase
-          .from("profiles")
-          .select("id", { count: "exact" })
-          .eq("role", "mentor");
-        
-        if (error) {
-          logger.error("Error fetching mentor count", error, {
-            component: "HeroSection",
-          });
-          return;
-        }
-        
-        const count = data?.length || 0;
-        setActiveMentorCount(count);
-      } catch (error) {
-        logger.error("Failed to fetch mentors", error, {
-          component: "HeroSection",
-        });
-      }
-    };
-
-    fetchActiveMentors();
-  }, []);
   return <section className="relative min-h-screen flex items-center justify-center pt-16 overflow-hidden">
       {/* Background Pattern */}
       <div className="absolute inset-0 -z-10">
@@ -92,21 +67,28 @@ const HeroSection = () => {
             <div className="text-center">
               <div className="flex items-center justify-center gap-1 text-3xl font-bold text-primary">
                 <Users className="w-6 h-6" />
-                {activeMentorCount > 0 ? `${activeMentorCount}+` : (activeMentorCount === 0 ? "0" : "500+")}
+                {stats.mentors > 0 ? `${stats.mentors}+` : "0"}
               </div>
               <p className="text-sm text-muted-foreground">Active Mentors</p>
             </div>
             <div className="text-center">
               <div className="flex items-center justify-center gap-1 text-3xl font-bold text-primary">
                 <BookOpen className="w-6 h-6" />
-                50+
+                {stats.subjects > 0 ? `${stats.subjects}+` : "0"}
               </div>
               <p className="text-sm text-muted-foreground">Subjects Covered</p>
             </div>
             <div className="text-center">
+              <div className="flex items-center justify-center gap-1 text-3xl font-bold text-primary">
+                <Sparkles className="w-6 h-6" />
+                {stats.sessions > 0 ? `${stats.sessions}+` : "10+"}
+              </div>
+              <p className="text-sm text-muted-foreground">Total Sessions</p>
+            </div>
+            <div className="text-center">
               <div className="flex items-center justify-center gap-1 text-3xl font-bold text-accent">
                 <Star className="w-6 h-6 fill-current" />
-                4.9
+                {stats.averageRating > 0 ? stats.averageRating : "4.5"}
               </div>
               <p className="text-sm text-muted-foreground">Average Rating</p>
             </div>
