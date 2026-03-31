@@ -89,6 +89,7 @@ const App = () => (
               {/* Catch-All / 404 */}
               <Route path="*" element={<NotFound />} />
             </Routes>
+            <SupportChatWidget />
           </Suspense>
         </AuthProvider>
       </BrowserRouter>
