@@ -141,6 +141,10 @@ export default function AdminDashboard() {
                         ))}
                     </div>
                 )}
+
+                {/* Support Tickets Section */}
+                <h2 className="text-2xl font-bold mt-12 mb-6">Support Tickets</h2>
+                <AdminSupportPanel />
             </main>
             <Footer />
         </div>
