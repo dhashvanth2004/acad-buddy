@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { Loader2 } from "lucide-react";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { SupportChatWidget } from "@/components/support/SupportChatWidget";
 
 // Lazy loading route components for massive performance optimization (Code Splitting)
 const Index = lazy(() => import("./pages/Index"));
@@ -88,6 +89,7 @@ const App = () => (
               {/* Catch-All / 404 */}
               <Route path="*" element={<NotFound />} />
             </Routes>
+            <SupportChatWidget />
           </Suspense>
         </AuthProvider>
       </BrowserRouter>
