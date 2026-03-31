@@ -93,6 +93,9 @@ export const SupportChatWidget = () => {
     scrollRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  // Don't render if not logged in
+  if (!user) return null;
+
   const handleCreateTicket = async () => {
     if (!newSubject.trim() || !user) return;
     setSending(true);
