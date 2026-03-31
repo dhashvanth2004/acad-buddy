@@ -37,9 +37,6 @@ export const SupportChatWidget = () => {
   const [sending, setSending] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // Don't render if not logged in
-  if (!user) return null;
-
   // Fetch tickets
   useEffect(() => {
     if (!user || !isOpen) return;
